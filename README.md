@@ -1,6 +1,6 @@
 # Verbatim Backend
 
-![Team Photo]('[Assets/Verbatim_Team_Pic.jpg](https://github.com/dartmouth-cs98-23f/verbatim_backend/blob/DahliaTheCoder-patch-1/Assets/Verbatim_Team_Pic.jpg)')
+![Team Photo]('(https://github.com/dartmouth-cs98-23f/verbatim_backend/blob/DahliaTheCoder-patch-1/Assets/Verbatim_Team_Pic.jpg)')
 
 ## Description
 
