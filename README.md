@@ -1,7 +1,9 @@
 # Verbatim Backend
 
-![Team Photo](Insert a Team Photo URL here)
-[*how?*](https://help.github.com/articles/about-readmes/#relative-links-and-image-paths-in-readme-files)
+![Team Photo]('Assets/Verbatim_Team_Pic.jpg')
+[_how?_](https://help.github.com/articles/about-readmes/#relative-links-and-image-paths-in-readme-files)
+
+## Description
 
 This repository houses the backend code for our project.
 
@@ -26,8 +28,8 @@ This is still something we need to figure out.
 
 ## Authors
 
-Eric Richardson is the author of this starter code.
+Ryan Dudak, Eve Wening, Eric Richardson, Dahlia Igiraneza, Jackline Gathoni
 
 ## Acknowledgments
 
-- Eric Richardson
+- Eric Richardson (for writing the initial starter code for this backend project)
