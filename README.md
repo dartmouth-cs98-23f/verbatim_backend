@@ -1,7 +1,6 @@
 # Verbatim Backend
 
-![Team Photo]('Assets/Verbatim_Team_Pic.jpg')
-[_how?_](https://help.github.com/articles/about-readmes/#relative-links-and-image-paths-in-readme-files)
+![Team Photo]('[Assets/Verbatim_Team_Pic.jpg](https://github.com/dartmouth-cs98-23f/verbatim_backend/blob/DahliaTheCoder-patch-1/Assets/Verbatim_Team_Pic.jpg)')
 
 ## Description
 
@@ -32,4 +31,4 @@ Ryan Dudak, Eve Wening, Eric Richardson, Dahlia Igiraneza, Jackline Gathoni
 
 ## Acknowledgments
 
-- Eric Richardson (for writing the initial starter code for this backend project)
+- Eric Richardson (For not only creating the initial starter code for this backend project but also taking the lead in its overall setup.)
