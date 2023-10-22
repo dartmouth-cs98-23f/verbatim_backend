@@ -2,9 +2,11 @@ package com.cs98.VerbatimBackend.controller;
 
 import com.cs98.VerbatimBackend.model.User;
 import com.cs98.VerbatimBackend.repository.UserRepository;
+import com.cs98.VerbatimBackend.request.LoginRequest;
 import com.cs98.VerbatimBackend.request.RegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +28,31 @@ public class AuthenticationController {
                 .build();
 
         return ResponseEntity.ok(userRepository.save(newUser));
+
+    }
+
+    @PostMapping(path = "api/v1/login")
+    public ResponseEntity<User> login(@RequestBody LoginRequest request) {
+        User userToAuthenticate;
+        if (ObjectUtils.isEmpty(request.getEmailOrUsername())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (userRepository.existsByEmail(request.getEmailOrUsername())) {
+            userToAuthenticate = userRepository.findByEmail(request.getEmailOrUsername());
+        }
+        else if (userRepository.existsByUsername(request.getEmailOrUsername())) {
+            userToAuthenticate = userRepository.findByUsername(request.getEmailOrUsername());
+        }
+        else {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        if (!userToAuthenticate.getPassword().equals(request.getPassword())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(userToAuthenticate);
 
     }
 }
