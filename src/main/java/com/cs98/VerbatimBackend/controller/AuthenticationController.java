@@ -18,13 +18,18 @@ public class AuthenticationController {
     private UserRepository userRepository;
     @PostMapping(path = "api/v1/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail()) || userRepository.existsByUsername(request.getUsername())) {
             return ResponseEntity.badRequest().build();
         }
         User newUser = User.builder()
-                .username(request.getUsername())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .email(request.getEmail())
+                .username(request.getUsername())
                 .password(request.getPassword())
+                .numGlobalChallengesCompleted(0)
+                .numCustomChallengesCompleted(0)
+                .streak(0)
                 .build();
 
         return ResponseEntity.ok(userRepository.save(newUser));
