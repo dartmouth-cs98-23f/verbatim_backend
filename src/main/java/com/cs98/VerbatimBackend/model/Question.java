@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
 @Builder
@@ -23,4 +25,13 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @OneToMany(mappedBy = "q1", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GlobalChallenge> globalChallengeQ1;
+
+    @OneToMany(mappedBy = "q2", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GlobalChallenge> globalChallengeQ2;
+
+    @OneToMany(mappedBy = "q3", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GlobalChallenge> globalChallengeQ3;
 }
