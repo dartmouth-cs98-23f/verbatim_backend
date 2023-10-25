@@ -38,9 +38,9 @@ public class GlobalChallengeGenerator {
 
         GlobalChallenge globalChallenge = GlobalChallenge.builder()
                 .date(Date.valueOf(LocalDate.now()))
-                .q1(dailyQuestions.get(0).getContent())
-                .q2(dailyQuestions.get(1).getContent())
-                .q3(dailyQuestions.get(2).getContent())
+                .q1(dailyQuestions.get(0))
+                .q2(dailyQuestions.get(1))
+                .q3(dailyQuestions.get(2))
                 .build();
 
         globalChallengeRepository.save(globalChallenge);

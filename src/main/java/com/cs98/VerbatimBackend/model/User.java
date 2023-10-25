@@ -9,6 +9,7 @@ import org.hibernate.annotations.Where;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Builder
@@ -43,6 +44,9 @@ public class User {
     private Integer numCustomChallengesCompleted;
 
     private Integer streak;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GlobalChallengeUserResponse> globalChallengeResponses;
 
 
 }

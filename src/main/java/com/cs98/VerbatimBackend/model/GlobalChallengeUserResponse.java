@@ -6,31 +6,31 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GlobalChallenge {
-
+@Table(name = "global_challenge_response")
+public class GlobalChallengeUserResponse {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "q1_id")
-    private Question q1;
+    @JoinColumn(name = "global_challenge_id")
+    private GlobalChallenge globalChallenge;
 
     @ManyToOne
-    @JoinColumn(name = "q2_id")
-    private Question q2;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "q3_id")
-    private Question q3;
+    private String responseQ1;
 
-    private Date date;
+    private String responseQ2;
+
+    private String responseQ3;
+
 }
