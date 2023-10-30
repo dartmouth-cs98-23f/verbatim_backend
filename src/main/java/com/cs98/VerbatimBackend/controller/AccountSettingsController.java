@@ -36,11 +36,9 @@ public class AccountSettingsController {
             user.setProfilePicture(request.getProfilePic());
 
             // save the user
-            userRepository.save(user);
+            return ResponseEntity.ok(userRepository.save(user));
         } else {
             return ResponseEntity.badRequest().build();
         }
-
-        return ResponseEntity.ok(user);
     }
 }
