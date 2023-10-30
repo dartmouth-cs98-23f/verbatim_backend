@@ -42,7 +42,7 @@ public class GlobalChallengeService {
         }
 
         respondingUser.setStreak(respondingUser.getStreak() + 1);
-        respondingUser.setNumGlobalChallengesCompleted(respondingUser.getNumCustomChallengesCompleted() + 1);
+        respondingUser.setNumGlobalChallengesCompleted(respondingUser.getNumGlobalChallengesCompleted() + 1);
         userRepository.save(respondingUser);
 
         GlobalChallengeUserResponse userResponseDAO = GlobalChallengeUserResponse.builder()
