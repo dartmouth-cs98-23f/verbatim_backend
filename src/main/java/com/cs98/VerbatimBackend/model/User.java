@@ -1,6 +1,7 @@
 package com.cs98.VerbatimBackend.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,6 +46,7 @@ public class User {
 
     private Integer streak;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GlobalChallengeUserResponse> globalChallengeResponses;
 

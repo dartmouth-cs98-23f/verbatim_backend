@@ -1,4 +1,4 @@
-package com.cs98.VerbatimBackend.schedule;
+package com.cs98.VerbatimBackend.service;
 
 import com.cs98.VerbatimBackend.model.Category;
 import com.cs98.VerbatimBackend.model.GlobalChallenge;
