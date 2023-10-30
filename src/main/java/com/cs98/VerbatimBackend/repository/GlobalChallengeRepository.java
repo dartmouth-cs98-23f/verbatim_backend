@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface GlobalChallengeRepository extends JpaRepository<GlobalChallenge, Integer> {
 
     GlobalChallenge findFirst1ByOrderByDateDesc();
+
+
 }
