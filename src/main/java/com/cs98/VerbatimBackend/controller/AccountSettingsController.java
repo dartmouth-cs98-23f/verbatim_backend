@@ -37,7 +37,7 @@ public class AccountSettingsController {
                 Optional<User> userOptional = Optional.ofNullable(userRepository.
                         findByUsername(request.getNewUsername()));
                 if (userOptional.isPresent()) {                             // check if username is taken
-                    throw new IllegalStateException("username taken");
+                    return ResponseEntity.badRequest().build();
                 }
                 user.setUsername(request.getNewUsername());
             }
@@ -65,7 +65,7 @@ public class AccountSettingsController {
                 Optional<User> userOptional = Optional.ofNullable(userRepository.
                         findByEmail(request.getEmail()));
                 if (userOptional.isPresent()) {                             // check if email is taken
-                    throw new IllegalStateException("email taken");
+                    return ResponseEntity.badRequest().build();
                 }
                 user.setEmail(request.getEmail());
             }
