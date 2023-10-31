@@ -9,6 +9,8 @@ public class AccountSettingsRequest {
 
     private String username;
 
+    private String newUsername;
+
     private String email;
 
     private String bio;
