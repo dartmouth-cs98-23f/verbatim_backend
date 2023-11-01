@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GlobalChallengeUserResponseRepository extends JpaRepository<GlobalChallengeUserResponse, Integer> {
 
+    GlobalChallengeUserResponse findByUserIdAndGlobalChallengeId(int userId, int globalChallengeId);
     Integer countByGlobalChallengeId(int id);
 
     Integer countByResponseQ1AndGlobalChallengeIdAndUserIdNot(String responseQ1, int challengeId, int userId);

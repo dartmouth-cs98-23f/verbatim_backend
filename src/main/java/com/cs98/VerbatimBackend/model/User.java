@@ -46,6 +46,8 @@ public class User {
 
     private Integer streak;
 
+    private Boolean hasCompletedDailyChallenge;
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GlobalChallengeUserResponse> globalChallengeResponses;
