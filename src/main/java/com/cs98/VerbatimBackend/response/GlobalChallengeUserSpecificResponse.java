@@ -5,7 +5,14 @@ import lombok.Data;
 
 @Data
 @Builder
-public class GlobalChallengeUserSubmissionResponse {
+public class GlobalChallengeUserSpecificResponse {
+    private String q1;
+    private String q2;
+    private String q3;
+
+    private String categoryQ1;
+    private String categoryQ2;
+    private String categoryQ3;
 
     private String responseQ1;
     private String responseQ2;
@@ -27,15 +34,5 @@ public class GlobalChallengeUserSubmissionResponse {
 
     private QuestionStatistics statsQ3;
 
-//    private String mostPopularQ1;
-//    private String mostPopularQ2;
-//    private String mostPopularQ3;
-
-//
-//    private int numMostPopularQ1;
-//
-//    private int numMostPopularQ2;
-//
-//    private int numMostPopularQ3;
 
 }

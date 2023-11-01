@@ -30,6 +30,7 @@ public class AuthenticationController {
                 .numGlobalChallengesCompleted(0)
                 .numCustomChallengesCompleted(0)
                 .streak(0)
+                .hasCompletedDailyChallenge(false)
                 .build();
 
         return ResponseEntity.ok(userRepository.save(newUser));
