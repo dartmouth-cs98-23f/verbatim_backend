@@ -50,7 +50,10 @@ public class DailyReset {
             updated_users.add(user);                        // add the user to the updated list
         }
         userRepository.saveAll(updated_users);
+    }
 
+    @Scheduled(fixedRate = 30000)
+    public void questionGenerator() {
         // get three random categories
         List<Category> dailyCategories = categoryRepository.fetchThreeRandomCategories();
 
