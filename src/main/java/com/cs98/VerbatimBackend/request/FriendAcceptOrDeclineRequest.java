@@ -1,12 +1,12 @@
 package com.cs98.VerbatimBackend.request;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class FriendRequest {
+public class FriendAcceptOrDeclineRequest {
     private String requestingUsername;
 
     private String requestedUsername;
 
+    private Boolean accept;
 }
