@@ -52,5 +52,20 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GlobalChallengeUserResponse> globalChallengeResponses;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "requestingFriend", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserRelationship> outboundFriendRequests;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "requestedFriend", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserRelationship> inboundFriendRequests;
+
+    public void addOutboundFriendRequest(UserRelationship relationship) {
+        this.outboundFriendRequests.add(relationship);
+    }
+
+    public void addInboundFriendRequest(UserRelationship relationship) {
+        this.outboundFriendRequests.add(relationship);
+    }
 
 }
