@@ -53,6 +53,12 @@ public class UserRelationshipController {
 
     @PostMapping(path = "api/v1/getFriendRequests")
     public ResponseEntity<List<User>> getFriendRequests(@RequestBody String username) {
+
+        // if user does not exist, return bad request
+        if (!userRepository.existsByUsername(username)) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
         User clientUser = userRepository.findByUsername(username);
 
         List<UserRelationship> userRelationshipsWithClientRequested = userRelationshipRepository.findByRequestedFriendIdAndActiveFalse(clientUser.getId());

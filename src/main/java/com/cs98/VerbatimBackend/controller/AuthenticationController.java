@@ -55,7 +55,7 @@ public class AuthenticationController {
             userToAuthenticate = userRepository.findByUsername(request.getEmailOrUsername());
         }
         else {
-            return ResponseEntity.status(Status.BAD_REQUEST).build();
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
         }
         
         if (!userToAuthenticate.getPassword().equals(request.getPassword())) {
