@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.cs98.VerbatimBackend.request.AccountSettingsRequest;
+import com.cs98.VerbatimBackend.misc.Status;
 
 import java.util.Optional;
 
@@ -24,8 +25,8 @@ public class AccountSettingsController {
         User user;
 
         // if user does not exist, return bad request
-        if (ObjectUtils.isEmpty(request.getUsername())) {
-            return ResponseEntity.badRequest().build();
+        if (!userRepository.existsByUsername(request.getUsername())) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
         }
         // if the user exists, update changed fields
         else if (userRepository.existsByUsername(request.getUsername())) {
@@ -37,7 +38,7 @@ public class AccountSettingsController {
                 Optional<User> userOptional = Optional.ofNullable(userRepository.
                         findByUsername(request.getNewUsername()));
                 if (userOptional.isPresent()) {                             // check if username is taken
-                    return ResponseEntity.badRequest().build();
+                    return ResponseEntity.status(Status.USERNAME_TAKEN).build();
                 }
                 user.setUsername(request.getNewUsername());
             }
@@ -65,7 +66,7 @@ public class AccountSettingsController {
                 Optional<User> userOptional = Optional.ofNullable(userRepository.
                         findByEmail(request.getEmail()));
                 if (userOptional.isPresent()) {                             // check if email is taken
-                    return ResponseEntity.badRequest().build();
+                    return ResponseEntity.status(Status.EMAIL_TAKEN).build();
                 }
                 user.setEmail(request.getEmail());
             }
@@ -78,7 +79,7 @@ public class AccountSettingsController {
 
             return ResponseEntity.ok(userRepository.save(user));             // save the user
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.BAD_REQUEST).build();
         }
     }
 }

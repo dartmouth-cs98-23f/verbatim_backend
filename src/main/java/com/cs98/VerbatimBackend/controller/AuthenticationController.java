@@ -10,6 +10,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import com.cs98.VerbatimBackend.misc.Status;
 
 @RestController
 public class AuthenticationController {
@@ -18,8 +19,11 @@ public class AuthenticationController {
     private UserRepository userRepository;
     @PostMapping(path = "api/v1/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail()) || userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.badRequest().build();
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity.status(Status.EMAIL_TAKEN).build();
+        }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            return ResponseEntity.status(Status.USERNAME_TAKEN).build();
         }
         User newUser = User.builder()
                 .firstName(request.getFirstName())
@@ -41,7 +45,7 @@ public class AuthenticationController {
     public ResponseEntity<User> login(@RequestBody LoginRequest request) {
         User userToAuthenticate;
         if (ObjectUtils.isEmpty(request.getEmailOrUsername())) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
         }
 
         if (userRepository.existsByEmail(request.getEmailOrUsername())) {
@@ -51,11 +55,11 @@ public class AuthenticationController {
             userToAuthenticate = userRepository.findByUsername(request.getEmailOrUsername());
         }
         else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
         }
         
         if (!userToAuthenticate.getPassword().equals(request.getPassword())) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.WRONG_PASSWORD).build();
         }
 
         return ResponseEntity.ok(userToAuthenticate);

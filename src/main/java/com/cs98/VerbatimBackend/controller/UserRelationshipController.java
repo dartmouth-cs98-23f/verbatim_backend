@@ -1,5 +1,6 @@
 package com.cs98.VerbatimBackend.controller;
 
+import com.cs98.VerbatimBackend.misc.Status;
 import com.cs98.VerbatimBackend.model.User;
 import com.cs98.VerbatimBackend.model.UserRelationship;
 import com.cs98.VerbatimBackend.repository.UserRelationshipRepository;
@@ -35,7 +36,7 @@ public class UserRelationshipController {
         User requestedUser = userRepository.findByUsername(request.getRequestedUsername());
 
         if (ObjectUtils.isEmpty(requestingUser) || ObjectUtils.isEmpty(requestedUser)) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
         }
 
         UserRelationship newRel = UserRelationship.builder()
@@ -52,6 +53,12 @@ public class UserRelationshipController {
 
     @PostMapping(path = "api/v1/getFriendRequests")
     public ResponseEntity<List<User>> getFriendRequests(@RequestBody String username) {
+
+        // if user does not exist, return bad request
+        if (!userRepository.existsByUsername(username)) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
         User clientUser = userRepository.findByUsername(username);
 
         List<UserRelationship> userRelationshipsWithClientRequested = userRelationshipRepository.findByRequestedFriendIdAndActiveFalse(clientUser.getId());
@@ -70,12 +77,12 @@ public class UserRelationshipController {
         User requestedUser = userRepository.findByUsername(request.getRequestedUsername());
 
         if (ObjectUtils.isEmpty(requestingUser) || ObjectUtils.isEmpty(requestedUser)) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
         }
 
         if (!userRelationshipRepository.existsByRequestingFriendIdAndRequestedFriendId(
                 requestingUser.getId(), requestedUser.getId())) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.BAD_REQUEST).build();
         }
 
         UserRelationship relationship = userRelationshipRepository.
