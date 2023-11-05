@@ -1,5 +1,6 @@
 package com.cs98.VerbatimBackend.controller;
 
+import com.cs98.VerbatimBackend.misc.Status;
 import com.cs98.VerbatimBackend.repository.CategoryRepository;
 import com.cs98.VerbatimBackend.response.GetGlobalChallengeQuestionResponse;
 import com.cs98.VerbatimBackend.response.GlobalChallengeUserSpecificResponse;
@@ -65,7 +66,7 @@ public class GlobalChallengeController {
     public ResponseEntity<GlobalChallengeUserSpecificResponse> submitResponse(
             @NotNull @RequestBody SubmitGlobalChallengeAnswerRequest request) {
         if (ObjectUtils.isEmpty(request.getUsername())) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.UNAUTHORIZED).build();
         }
         GlobalChallengeUserSpecificResponse response = globalChallengeService.submitGlobalResponse(request);
 
