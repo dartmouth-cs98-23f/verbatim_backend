@@ -50,7 +50,7 @@ public class UserRelationshipController {
 
     }
 
-    @GetMapping(path = "api/v1/getFriendRequests")
+    @PostMapping(path = "api/v1/getFriendRequests")
     public ResponseEntity<List<User>> getFriendRequests(@RequestBody String username) {
         User clientUser = userRepository.findByUsername(username);
 
@@ -91,7 +91,7 @@ public class UserRelationshipController {
         return ResponseEntity.ok("success");
     }
 
-    @GetMapping(path = "api/v1/getFriends")
+    @PostMapping(path = "api/v1/getFriends")
     public ResponseEntity<List<User>> getFriends(@RequestBody String username) {
         User clientUser = userRepository.findByUsername(username);
         List<UserRelationship> activeFriends = userRelationshipRepository.findActiveFriendsByUserId(clientUser.getId());
