@@ -71,6 +71,32 @@ public class UserRelationshipController {
         return ResponseEntity.ok(friendRequests);
     }
 
+    @PostMapping(path = "api/v1/getUsersIHaveRequested")
+    public ResponseEntity<List<User>> getUsersIHaveRequested(@RequestBody String username) {
+
+        // if user does not exist, return bad request
+        if(!userRepository.existsByUsername(username)) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
+        // get the requesting user
+        User clientUser = userRepository.findByUsername(username);
+
+        // get a list of all UserRelationships where clientUser is the requesting user
+        List<UserRelationship> userRelationshipsWithClientRequesting = userRelationshipRepository.findByRequestingFriendIdAndActiveFalse(clientUser.getId());
+
+        // create an empty friends list
+        List<User> friendRequests = new ArrayList<>();
+
+        // loop through the UserRelationships and add each requested user to friendRequests
+        for (UserRelationship rel : userRelationshipsWithClientRequesting) {
+            friendRequests.add(rel.getRequestedFriend());
+        }
+
+        // return the requested users
+        return ResponseEntity.ok(friendRequests);
+    }
+
     @PostMapping(path = "api/v1/handleFriendRequest")
     public ResponseEntity<String> acceptFriendRequest(@RequestBody FriendAcceptOrDeclineRequest request) {
         User requestingUser = userRepository.findByUsername(request.getRequestingUsername());

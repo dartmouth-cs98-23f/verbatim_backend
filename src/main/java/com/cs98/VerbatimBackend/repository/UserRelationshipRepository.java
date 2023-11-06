@@ -14,6 +14,8 @@ public interface UserRelationshipRepository extends JpaRepository<UserRelationsh
 
     List<UserRelationship> findByRequestedFriendIdAndActiveFalse(Integer requestedId);
 
+    List<UserRelationship> findByRequestingFriendIdAndActiveFalse(Integer requestingId);
+
     UserRelationship findByRequestingFriendIdAndRequestedFriendId(Integer requestingId, Integer requestedId);
 
     @Query(value = "SELECT * FROM user_relationship where (requesting_user_id = ?1 OR requested_user_id = ?1) AND active = TRUE",
