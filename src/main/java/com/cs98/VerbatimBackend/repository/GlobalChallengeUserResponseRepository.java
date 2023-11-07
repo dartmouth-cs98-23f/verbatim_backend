@@ -5,10 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface GlobalChallengeUserResponseRepository extends JpaRepository<GlobalChallengeUserResponse, Integer> {
 
     GlobalChallengeUserResponse findByUserIdAndGlobalChallengeId(int userId, int globalChallengeId);
+
+    List<GlobalChallengeUserResponse> findByGlobalChallengeIdAndUserIdIn(int globalChallengeId, List<Integer> userIdList);
     Integer countByGlobalChallengeId(int id);
 
     Integer countByResponseQ1AndGlobalChallengeIdAndUserIdNot(String responseQ1, int challengeId, int userId);
