@@ -1,11 +1,9 @@
 package com.cs98.VerbatimBackend.service;
 
-import com.cs98.VerbatimBackend.model.GlobalChallenge;
-import com.cs98.VerbatimBackend.model.GlobalChallengeUserResponse;
-import com.cs98.VerbatimBackend.model.Question;
-import com.cs98.VerbatimBackend.model.User;
+import com.cs98.VerbatimBackend.model.*;
 import com.cs98.VerbatimBackend.repository.GlobalChallengeRepository;
 import com.cs98.VerbatimBackend.repository.GlobalChallengeUserResponseRepository;
+import com.cs98.VerbatimBackend.repository.UserRelationshipRepository;
 import com.cs98.VerbatimBackend.repository.UserRepository;
 import com.cs98.VerbatimBackend.request.SubmitGlobalChallengeAnswerRequest;
 import com.cs98.VerbatimBackend.response.GlobalChallengeUserSpecificResponse;
@@ -14,6 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class GlobalChallengeService {
@@ -26,6 +29,9 @@ public class GlobalChallengeService {
 
     @Autowired
     private GlobalChallengeUserResponseRepository globalChallengeUserResponseRepository;
+
+    @Autowired
+    private UserRelationshipRepository userRelationshipRepository;
 
     public GlobalChallengeUserSpecificResponse submitGlobalResponse(SubmitGlobalChallengeAnswerRequest submissionRequest) {
         User respondingUser = userRepository.findByUsername(submissionRequest.getUsername());
@@ -91,6 +97,39 @@ public class GlobalChallengeService {
                         user.getId()
                 );
 
+        // make a list of the user's active friends' IDs
+        List<UserRelationship> activeFriends = userRelationshipRepository.findActiveFriendsByUserId(user.getId());
+        List<Integer> friendsList = new ArrayList<>();
+        for (UserRelationship relationship : activeFriends) {
+            if (relationship.getRequestingFriend().getId().equals(user.getId())) {
+                friendsList.add(relationship.getRequestedFriend().getId());
+            }
+            else {
+                friendsList.add(relationship.getRequestingFriend().getId());
+            }
+        }
+
+        // get all global challenge responses for the given ID and the user's friends
+        List<GlobalChallengeUserResponse> friendResponses = globalChallengeUserResponseRepository
+                .findByGlobalChallengeIdAndUserIdIn(response.getGlobalChallenge().getId(), friendsList);
+
+        // define maps for each question
+        Map<String, String> q1FriendResponses = new HashMap<String, String>();
+        Map<String, String> q2FriendResponses = new HashMap<String, String>();
+        Map<String, String> q3FriendResponses = new HashMap<String, String>();
+
+        // for each friend's global challenge response, map their username to their response
+        for (GlobalChallengeUserResponse friendResponse: friendResponses) {
+            String friend = friendResponse.getUser().getUsername();
+            String responseQ1 = friendResponse.getResponseQ1();
+            String responseQ2 = friendResponse.getResponseQ2();
+            String responseQ3 = friendResponse.getResponseQ3();
+
+            q1FriendResponses.put(friend, responseQ1);
+            q2FriendResponses.put(friend, responseQ2);
+            q3FriendResponses.put(friend, responseQ3);
+        }
+
         String firstMostPopularQ1 = globalChallengeUserResponseRepository.findMostPopularQ1ResponseByChallengeId(
                 response.getGlobalChallenge().getId()
         );
@@ -120,8 +159,8 @@ public class GlobalChallengeService {
                         thirdMostPopularQ1,
                         response.getGlobalChallenge().getId()
                 ))
+                .friendResponses(q1FriendResponses)
                 .build();
-
 
         String firstMostPopularQ2 = globalChallengeUserResponseRepository.findMostPopularQ2ResponseByChallengeId(
                 response.getGlobalChallenge().getId()
@@ -154,6 +193,7 @@ public class GlobalChallengeService {
                         thirdMostPopularQ2,
                         response.getGlobalChallenge().getId()
                 ))
+                .friendResponses(q2FriendResponses)
                 .build();
 
         String firstMostPopularQ3 = globalChallengeUserResponseRepository.findMostPopularQ3ResponseByChallengeId(
@@ -185,6 +225,7 @@ public class GlobalChallengeService {
                         thirdMostPopularQ3,
                         response.getGlobalChallenge().getId()
                 ))
+                .friendResponses(q3FriendResponses)
                 .build();
 
         return GlobalChallengeUserSpecificResponse.builder()
