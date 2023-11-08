@@ -96,4 +96,10 @@ public interface GlobalChallengeUserResponseRepository extends JpaRepository<Glo
             Integer id,
             String mostPopularQ3,
             String secondMostPopularQ3);
+
+    List<GlobalChallengeUserResponse> findAllByGlobalChallengeIdAndResponseQ1(int globalChallengeId, String responseQ1);
+
+    List<GlobalChallengeUserResponse> findAllByGlobalChallengeIdAndResponseQ2(int globalChallengeId, String responseQ2);
+
+    List<GlobalChallengeUserResponse> findAllByGlobalChallengeIdAndResponseQ3(int globalChallengeId, String responseQ3);
 }
