@@ -97,6 +97,38 @@ public class GlobalChallengeService {
                         user.getId()
                 );
 
+        // figure out which question has the most verbatims
+        int mostVerbatim = Math.max(numVerbatimQ1, Math.max(numVerbatimQ2, numVerbatimQ3));
+
+        // create an empty list of usernames
+        Map<String, List<String>> verbatastic = new HashMap<String, List<String>>();
+        List<String> usersVerbatim = new ArrayList<String>();
+        List<GlobalChallengeUserResponse> submissions;
+        String questionVerbatim;
+
+        // for the question with the most verbatims, get all global challenge submissions with matching response
+        if (mostVerbatim == numVerbatimQ1) {
+            questionVerbatim = "q1";
+            submissions = globalChallengeUserResponseRepository.
+                    findAllByGlobalChallengeIdAndResponseQ1(response.getGlobalChallenge().getId(), response.getResponseQ1());
+        } else if (mostVerbatim == numVerbatimQ2) {
+            questionVerbatim = "q2";
+            submissions = globalChallengeUserResponseRepository.
+                    findAllByGlobalChallengeIdAndResponseQ2(response.getGlobalChallenge().getId(), response.getResponseQ2());
+        } else {
+            questionVerbatim = "q3";
+            submissions = globalChallengeUserResponseRepository.
+                    findAllByGlobalChallengeIdAndResponseQ3(response.getGlobalChallenge().getId(), response.getResponseQ3());
+        }
+
+        // add all usernames except for the current user to usersVerbatim
+        for (GlobalChallengeUserResponse submission: submissions) {
+            if (!submission.getUser().getUsername().equals(user.getUsername())) {
+                usersVerbatim.add(submission.getUser().getUsername());
+            }
+        }
+        verbatastic.put(questionVerbatim, usersVerbatim);
+
         // make a list of the user's active friends' IDs
         List<UserRelationship> activeFriends = userRelationshipRepository.findActiveFriendsByUserId(user.getId());
         List<Integer> friendsList = new ArrayList<>();
@@ -246,6 +278,7 @@ public class GlobalChallengeService {
                 .statsQ1(statsQ1)
                 .statsQ2(statsQ2)
                 .statsQ3(statsQ3)
+                .verbatasticUsers(verbatastic)
                 .build();
     }
 }
