@@ -104,21 +104,21 @@ public class GlobalChallengeService {
         Map<String, List<String>> verbatastic = new HashMap<String, List<String>>();
         List<String> usersVerbatim = new ArrayList<String>();
         List<GlobalChallengeUserResponse> submissions;
-        String questionVerbatim;
+        String responseVerbatim;
 
         // for the question with the most verbatims, get all global challenge submissions with matching response
         if (mostVerbatim == numVerbatimQ1) {
-            questionVerbatim = "q1";
+            responseVerbatim = response.getResponseQ1();
             submissions = globalChallengeUserResponseRepository.
-                    findAllByGlobalChallengeIdAndResponseQ1(response.getGlobalChallenge().getId(), response.getResponseQ1());
+                    findAllByGlobalChallengeIdAndResponseQ1(response.getGlobalChallenge().getId(), responseVerbatim);
         } else if (mostVerbatim == numVerbatimQ2) {
-            questionVerbatim = "q2";
+            responseVerbatim = response.getResponseQ2();
             submissions = globalChallengeUserResponseRepository.
-                    findAllByGlobalChallengeIdAndResponseQ2(response.getGlobalChallenge().getId(), response.getResponseQ2());
+                    findAllByGlobalChallengeIdAndResponseQ2(response.getGlobalChallenge().getId(), responseVerbatim);
         } else {
-            questionVerbatim = "q3";
+            responseVerbatim = response.getResponseQ3();
             submissions = globalChallengeUserResponseRepository.
-                    findAllByGlobalChallengeIdAndResponseQ3(response.getGlobalChallenge().getId(), response.getResponseQ3());
+                    findAllByGlobalChallengeIdAndResponseQ3(response.getGlobalChallenge().getId(), responseVerbatim);
         }
 
         // add all usernames except for the current user to usersVerbatim
@@ -127,7 +127,7 @@ public class GlobalChallengeService {
                 usersVerbatim.add(submission.getUser().getUsername());
             }
         }
-        verbatastic.put(questionVerbatim, usersVerbatim);
+        verbatastic.put(responseVerbatim, usersVerbatim);
 
         // make a list of the user's active friends' IDs
         List<UserRelationship> activeFriends = userRelationshipRepository.findActiveFriendsByUserId(user.getId());
