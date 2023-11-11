@@ -375,3 +375,6 @@ insert into question (id, content, category_id) values (342, 'Flowers with two s
 insert into question (id, content, category_id) values (343, 'Flowers with five letters', 32);
 insert into question (id, content, category_id) values (344, 'Flowers with a double letter', 32);
 insert into question (id, content, category_id) values (345, 'Flowers that start and end in a vowel', 32);
+
+insert into role (id, rolename) values (1, 'USER');
+insert into role (id, rolename) values (2, 'ADMIN');

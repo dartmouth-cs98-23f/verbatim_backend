@@ -1,5 +1,6 @@
 package com.cs98.VerbatimBackend.repository;
 
+import com.cs98.VerbatimBackend.model.Role;
 import com.cs98.VerbatimBackend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
