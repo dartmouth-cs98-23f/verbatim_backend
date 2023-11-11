@@ -1,11 +1,16 @@
 package com.cs98.VerbatimBackend.controller;
 
+import com.cs98.VerbatimBackend.misc.UserDetailsPrincipal;
 import com.cs98.VerbatimBackend.model.User;
+import com.cs98.VerbatimBackend.repository.RoleRepository;
 import com.cs98.VerbatimBackend.repository.UserRepository;
 import com.cs98.VerbatimBackend.request.LoginRequest;
 import com.cs98.VerbatimBackend.request.RegisterRequest;
+import com.cs98.VerbatimBackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +22,16 @@ public class AuthenticationController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
     @PostMapping(path = "api/v1/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -25,14 +40,16 @@ public class AuthenticationController {
         if (userRepository.existsByUsername(request.getUsername())) {
             return ResponseEntity.status(Status.USERNAME_TAKEN).build();
         }
+
         User newUser = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .username(request.getUsername())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .numGlobalChallengesCompleted(0)
                 .numCustomChallengesCompleted(0)
+                .role(roleRepository.findByRolename("ROLE_USER"))
                 .streak(0)
                 .hasCompletedDailyChallenge(false)
                 .build();
@@ -43,26 +60,13 @@ public class AuthenticationController {
 
     @PostMapping(path = "api/v1/login")
     public ResponseEntity<User> login(@RequestBody LoginRequest request) {
-        User userToAuthenticate;
-        if (ObjectUtils.isEmpty(request.getEmailOrUsername())) {
-            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
-        }
 
-        if (userRepository.existsByEmail(request.getEmailOrUsername())) {
-            userToAuthenticate = userRepository.findByEmail(request.getEmailOrUsername());
-        }
-        else if (userRepository.existsByUsername(request.getEmailOrUsername())) {
-            userToAuthenticate = userRepository.findByUsername(request.getEmailOrUsername());
-        }
-        else {
-            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
-        }
-        
-        if (!userToAuthenticate.getPassword().equals(request.getPassword())) {
-            return ResponseEntity.status(Status.WRONG_PASSWORD).build();
-        }
+        UserDetailsPrincipal userToAuthenticate = userService.loadUserByUsername(request.getEmailOrUsername());
 
-        return ResponseEntity.ok(userToAuthenticate);
+        if (passwordEncoder.matches(request.getPassword(), userToAuthenticate.getPassword())) {
+            return ResponseEntity.ok(userToAuthenticate.getUser());
+        }
+        return ResponseEntity.status(Status.WRONG_PASSWORD).build();
 
     }
 }
