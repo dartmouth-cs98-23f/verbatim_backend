@@ -31,7 +31,7 @@ public class DailyReset {
     @Autowired
     private UserRepository userRepository;
 
-    @Scheduled(cron = "@midnight") // runs every day at midnight
+    @Scheduled(cron = "@midnight", zone = "EST") // runs every day at midnight
     public void dailyBatchReset() {
 
         // get all users
