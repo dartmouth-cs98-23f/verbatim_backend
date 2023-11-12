@@ -24,7 +24,7 @@ Here are the steps to follow in order to run the initial 'Verbatim Backend' code
 
 ## Deployment
 
-This is still something we need to figure out.
+The backend is deployed via Heroku.
 
 ## Authors
 
