@@ -264,6 +264,7 @@ public class GlobalChallengeService {
                 .q1(response.getGlobalChallenge().getQ1().getContent())
                 .q2(response.getGlobalChallenge().getQ2().getContent())
                 .q3(response.getGlobalChallenge().getQ3().getContent())
+                .globalChallengeId(response.getGlobalChallenge().getId())
                 .categoryQ1(response.getGlobalChallenge().getQ1().getCategory().getTitle())
                 .categoryQ2(response.getGlobalChallenge().getQ2().getCategory().getTitle())
                 .categoryQ3(response.getGlobalChallenge().getQ3().getCategory().getTitle())

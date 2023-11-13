@@ -50,6 +50,7 @@ public class GlobalChallengeController {
                     .q1(dailyChallenge.getQ1().getContent())
                     .q2(dailyChallenge.getQ2().getContent())
                     .q3(dailyChallenge.getQ3().getContent())
+                    .globalChallengeId(dailyChallenge.getId())
                     .totalResponses(globalChallengeUserResponseRepository.countByGlobalChallengeId(dailyChallenge.getId()))
                     .categoryQ1(dailyChallenge.getQ1().getCategory().getTitle())
                     .categoryQ2(dailyChallenge.getQ2().getCategory().getTitle())

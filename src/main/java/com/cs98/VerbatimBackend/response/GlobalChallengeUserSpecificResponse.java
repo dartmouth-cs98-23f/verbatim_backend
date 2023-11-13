@@ -21,6 +21,8 @@ public class GlobalChallengeUserSpecificResponse {
     private String responseQ2;
     private String responseQ3;
 
+    private int globalChallengeId;
+
     private int totalResponses;
 
     private int numVerbatimQ1;
