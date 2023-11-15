@@ -52,29 +52,23 @@ public class DailyReset {
         }
         userRepository.saveAll(updated_users);
 
-//        List<Category> dailyCategories = categoryRepository.fetchThreeRandomCategories();
+        List<Category> dailyCategories = categoryRepository.fetchThreeRandomCategories();
 
-        // get a random question from each category
-//        List<Question> dailyQuestions = new ArrayList<>();
-//        for (Category category : dailyCategories) {
-//            Question question = questionRepository.fetchRandomQuestionByCategoryId(category.getId());
-//            dailyQuestions.add(question);
-//        }
+//         get a random question from each category
+        List<Question> dailyQuestions = new ArrayList<>();
+        for (Category category : dailyCategories) {
+            Question question = questionRepository.fetchRandomQuestionByCategoryId(category.getId());
+            dailyQuestions.add(question);
+        }
 
-        // build the row in the global challenge table
-//        GlobalChallenge globalChallenge = GlobalChallenge.builder()
-//                .date(Date.valueOf(LocalDate.now()))
-//                .q1(dailyQuestions.get(0))
-//                .q2(dailyQuestions.get(1))
-//                .q3(dailyQuestions.get(2))
-//                .build();
-
+//         build the row in the global challenge table
         GlobalChallenge globalChallenge = GlobalChallenge.builder()
                 .date(Date.valueOf(LocalDate.now()))
-                .q1(questionRepository.findById(75).orElse(null))
-                .q2(questionRepository.findById(146).orElse(null))
-                .q3(questionRepository.findById(346).orElse(null))
+                .q1(dailyQuestions.get(0))
+                .q2(dailyQuestions.get(1))
+                .q3(dailyQuestions.get(2))
                 .build();
+
 
         // save the global challenge
         globalChallengeRepository.save(globalChallenge);
