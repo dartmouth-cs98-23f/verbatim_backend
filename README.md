@@ -7,9 +7,7 @@ This repository houses the backend code for our project.
 ## Architecture
 
 In this project, we've chosen Spring Boot as our backend technology stack. Below is our current database structure.
-![Verbatim-updated-db](https://github.com/dartmouth-cs98-23f/verbatim_backend/assets/76986782/08d30e48-ddbf-40fa-9033-143d44a5a995)
-
-
+![Verbatim (1)](https://github.com/dartmouth-cs98-23f/verbatim_backend/assets/76986782/193ccf46-a16a-43d4-9438-b3f54bb2737f)
 
 
 ## Setup
