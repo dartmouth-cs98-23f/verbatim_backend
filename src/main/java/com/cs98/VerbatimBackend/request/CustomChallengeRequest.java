@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class CustomChallengeRequest {
-    private String groupName;
+    private int groupId;
 
     private String createdByUsername;
 

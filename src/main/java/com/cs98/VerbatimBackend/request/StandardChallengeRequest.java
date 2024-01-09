@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class StandardChallengeRequest {
-    private String groupName;
+    private int groupId;
 
     private String createdByUsername;
 }

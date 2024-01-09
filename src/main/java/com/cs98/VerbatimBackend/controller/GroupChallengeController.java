@@ -41,7 +41,7 @@ public class GroupChallengeController {
     @PostMapping("api/v1/createStandardChallenge")
     public ResponseEntity<List<Question>> createStandardChallenge(@RequestBody StandardChallengeRequest request) {
         User createdByUser = userRepository.findByUsername(request.getCreatedByUsername());
-        UserGroup group = userGroupRepository.findByName(request.getGroupName());
+        UserGroup group = userGroupRepository.findById(request.getGroupId());
 
         // TODO: check if createdByUser is in group
 
@@ -90,10 +90,10 @@ public class GroupChallengeController {
         return ResponseEntity.ok(standardQuestions);
     }
 
-    @PostMapping("api/v1/createCustomChallenge")
-    public ResponseEntity<String> createStandardChallenge(@RequestBody CustomChallengeRequest request) {
-        User createdByUser = userRepository.findByUsername(request.getCreatedByUsername());
-        // placeholder - TODO
-        return null;
-    }
+//    @PostMapping("api/v1/createCustomChallenge")
+//    public ResponseEntity<String> createStandardChallenge(@RequestBody CustomChallengeRequest request) {
+//        User createdByUser = userRepository.findByUsername(request.getCreatedByUsername());
+//        // placeholder - TODO
+//        return null;
+//    }
 }
