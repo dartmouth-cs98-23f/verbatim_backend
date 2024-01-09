@@ -8,5 +8,8 @@ public class Status {
     public static final int EMAIL_TAKEN = 462;
     public static final int WRONG_PASSWORD = 463;
     public static final int OLD_PASSWORD_SAME_AS_NEW_PASSWORD = 464;
+    public static final int GROUP_NOT_FOUND = 465;
+
+    public static final int GROUP_CHALLENGE_NOT_FOUND = 466;
 
 }

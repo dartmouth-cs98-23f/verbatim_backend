@@ -13,4 +13,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     @Query(value = "SELECT * FROM category ORDER BY RANDOM() LIMIT 3", nativeQuery = true)
     List<Category> fetchThreeRandomCategories();
 
+    @Query(value = "SELECT * FROM category ORDER BY RANDOM() LIMIT 5", nativeQuery = true)
+    List<Category> fetchFiveRandomCategories();
+
 }
