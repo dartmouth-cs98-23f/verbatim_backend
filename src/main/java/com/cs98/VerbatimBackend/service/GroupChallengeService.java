@@ -46,6 +46,8 @@ public class GroupChallengeService {
                 .createdBy(createdByUser)
                 .group(group)
                 .isCustom(isCustom)
+                .date(Date.valueOf(LocalDate.now()))
+                .isActive(true)
                 .build();
 
         // save the group challenge

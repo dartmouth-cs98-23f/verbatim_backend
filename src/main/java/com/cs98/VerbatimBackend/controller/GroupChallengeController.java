@@ -31,6 +31,9 @@ public class GroupChallengeController {
     private UserGroupRepository userGroupRepository;
 
     @Autowired
+    private GroupChallengeRepository groupChallengeRepository;
+
+    @Autowired
     private GroupChallengeService groupChallengeService;
 
     @PostMapping("api/v1/createStandardChallenge")
@@ -47,6 +50,11 @@ public class GroupChallengeController {
 
         if (ObjectUtils.isEmpty(group)) { // check that group exists
             return ResponseEntity.status(Status.GROUP_NOT_FOUND).build();
+        }
+
+        if(groupChallengeRepository // check that user doesn't have active challenge in group
+                .existsByGroupAndCreatedByAndIsActive(group, createdByUser, true)) {
+            return ResponseEntity.status(Status.ACTIVE_CHALLENGE_MAX).build();
         }
 
         // create a group challenge
@@ -75,6 +83,11 @@ public class GroupChallengeController {
 
         if (ObjectUtils.isEmpty(group)) { // check that group exists
             return ResponseEntity.status(Status.GROUP_NOT_FOUND).build();
+        }
+
+        if(groupChallengeRepository // check that user doesn't have active challenge in group
+                .existsByGroupAndCreatedByAndIsActive(group, createdByUser, true)) {
+            return ResponseEntity.status(Status.ACTIVE_CHALLENGE_MAX).build();
         }
 
         // create a group challenge
