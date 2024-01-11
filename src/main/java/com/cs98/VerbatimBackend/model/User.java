@@ -36,6 +36,10 @@ public class User {
 
     private String password;
 
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
+
     private String profilePicture;
 
     private String bio;
@@ -52,5 +56,37 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GlobalChallengeUserResponse> globalChallengeResponses;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StandardChallengeResponse> standardChallengeResponses;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CustomChallengeResponse> customChallengeResponses;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "requestingFriend", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserRelationship> outboundFriendRequests;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "requestedFriend", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserRelationship> inboundFriendRequests;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserGroupJunction> userGroups;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<GroupChallenge> createdCustomChallenges;
+
+
+    public void addOutboundFriendRequest(UserRelationship relationship) {
+        this.outboundFriendRequests.add(relationship);
+    }
+
+    public void addInboundFriendRequest(UserRelationship relationship) {
+        this.outboundFriendRequests.add(relationship);
+    }
 
 }

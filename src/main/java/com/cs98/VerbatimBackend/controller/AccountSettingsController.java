@@ -3,6 +3,7 @@ package com.cs98.VerbatimBackend.controller;
 import com.cs98.VerbatimBackend.model.User;
 import com.cs98.VerbatimBackend.repository.UserRepository;
 import com.cs98.VerbatimBackend.request.RegisterRequest;
+import com.cs98.VerbatimBackend.request.ResetPasswordRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.cs98.VerbatimBackend.request.AccountSettingsRequest;
+import com.cs98.VerbatimBackend.misc.Status;
 
 import java.util.Optional;
 
@@ -20,12 +22,12 @@ public class AccountSettingsController {
     private UserRepository userRepository;
 
     @PostMapping(path = "api/v1/accountSettings")
-    public ResponseEntity<User> register(@RequestBody AccountSettingsRequest request) {
+    public ResponseEntity<User> accountSettings(@RequestBody AccountSettingsRequest request) {
         User user;
 
         // if user does not exist, return bad request
-        if (ObjectUtils.isEmpty(request.getUsername())) {
-            return ResponseEntity.badRequest().build();
+        if (!userRepository.existsByUsername(request.getUsername())) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
         }
         // if the user exists, update changed fields
         else if (userRepository.existsByUsername(request.getUsername())) {
@@ -37,7 +39,7 @@ public class AccountSettingsController {
                 Optional<User> userOptional = Optional.ofNullable(userRepository.
                         findByUsername(request.getNewUsername()));
                 if (userOptional.isPresent()) {                             // check if username is taken
-                    return ResponseEntity.badRequest().build();
+                    return ResponseEntity.status(Status.USERNAME_TAKEN).build();
                 }
                 user.setUsername(request.getNewUsername());
             }
@@ -65,7 +67,7 @@ public class AccountSettingsController {
                 Optional<User> userOptional = Optional.ofNullable(userRepository.
                         findByEmail(request.getEmail()));
                 if (userOptional.isPresent()) {                             // check if email is taken
-                    return ResponseEntity.badRequest().build();
+                    return ResponseEntity.status(Status.EMAIL_TAKEN).build();
                 }
                 user.setEmail(request.getEmail());
             }
@@ -78,7 +80,41 @@ public class AccountSettingsController {
 
             return ResponseEntity.ok(userRepository.save(user));             // save the user
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.BAD_REQUEST).build();
+        }
+    }
+
+    @PostMapping (path = "api/v1/resetPassword")
+    public ResponseEntity<User> resetPassword(@RequestBody ResetPasswordRequest request) {
+        User user;
+
+        // if user does not exist, return bad request
+        if (!userRepository.existsByUsername(request.getUsername())) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
+        // if the user exists, update password
+        else if (userRepository.existsByUsername(request.getUsername())) {
+            user = userRepository.findByUsername(request.getUsername());
+
+            // make sure old password matches user's current password
+            if (!request.getOldPassword().equals(user.getPassword())) {
+                return ResponseEntity.status(Status.WRONG_PASSWORD).build();
+            }
+
+            // don't update if not changed
+            if(request.getNewPassword().equals(request.getOldPassword())) {
+                return ResponseEntity.status(Status.OLD_PASSWORD_SAME_AS_NEW_PASSWORD).build();
+            }
+
+            if (!request.getNewPassword().isEmpty()) {                      // make sure new password is not empty
+                user.setPassword(request.getNewPassword());                 // update the password
+                return ResponseEntity.ok(userRepository.save(user));        // save the user
+            } else {
+                return ResponseEntity.status(Status.BAD_REQUEST).build();
+            }
+        } else {
+            return ResponseEntity.status(Status.BAD_REQUEST).build();
         }
     }
 }

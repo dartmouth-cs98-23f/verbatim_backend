@@ -1,5 +1,6 @@
 package com.cs98.VerbatimBackend.controller;
 
+import com.cs98.VerbatimBackend.misc.Status;
 import com.cs98.VerbatimBackend.repository.CategoryRepository;
 import com.cs98.VerbatimBackend.response.GetGlobalChallengeQuestionResponse;
 import com.cs98.VerbatimBackend.response.GlobalChallengeUserSpecificResponse;
@@ -15,10 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class GlobalChallengeController {
@@ -52,6 +50,8 @@ public class GlobalChallengeController {
                     .q1(dailyChallenge.getQ1().getContent())
                     .q2(dailyChallenge.getQ2().getContent())
                     .q3(dailyChallenge.getQ3().getContent())
+                    .globalChallengeId(dailyChallenge.getId())
+                    .totalResponses(globalChallengeUserResponseRepository.countByGlobalChallengeId(dailyChallenge.getId()))
                     .categoryQ1(dailyChallenge.getQ1().getCategory().getTitle())
                     .categoryQ2(dailyChallenge.getQ2().getCategory().getTitle())
                     .categoryQ3(dailyChallenge.getQ3().getCategory().getTitle())
@@ -65,7 +65,7 @@ public class GlobalChallengeController {
     public ResponseEntity<GlobalChallengeUserSpecificResponse> submitResponse(
             @NotNull @RequestBody SubmitGlobalChallengeAnswerRequest request) {
         if (ObjectUtils.isEmpty(request.getUsername())) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(Status.UNAUTHORIZED).build();
         }
         GlobalChallengeUserSpecificResponse response = globalChallengeService.submitGlobalResponse(request);
 

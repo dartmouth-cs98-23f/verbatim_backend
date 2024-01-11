@@ -3,6 +3,9 @@ package com.cs98.VerbatimBackend.response;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
+
 @Data
 @Builder
 public class GlobalChallengeUserSpecificResponse {
@@ -17,6 +20,8 @@ public class GlobalChallengeUserSpecificResponse {
     private String responseQ1;
     private String responseQ2;
     private String responseQ3;
+
+    private int globalChallengeId;
 
     private int totalResponses;
 
@@ -33,6 +38,8 @@ public class GlobalChallengeUserSpecificResponse {
     private QuestionStatistics statsQ2;
 
     private QuestionStatistics statsQ3;
+
+    private Map<String, List<String>> verbatasticUsers;
 
 
 }

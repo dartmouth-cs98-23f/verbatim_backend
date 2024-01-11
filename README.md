@@ -6,8 +6,8 @@ This repository houses the backend code for our project.
 
 ## Architecture
 
-In this project, we've chosen Spring Boot as our backend technology stack. Below is our current datavase structure.
-![Verbatim](https://github.com/dartmouth-cs98-23f/verbatim_backend/assets/76986782/28d955fb-61e1-4233-bf20-94fec9b75b5e)
+In this project, we've chosen Spring Boot as our backend technology stack. Below is our current database structure.
+![Verbatim (1)](https://github.com/dartmouth-cs98-23f/verbatim_backend/assets/76986782/0fa7311e-b698-4466-a064-4067c5268205)
 
 
 ## Setup
@@ -23,7 +23,7 @@ Here are the steps to follow in order to run the initial 'Verbatim Backend' code
 
 ## Deployment
 
-This is still something we need to figure out.
+The backend is deployed via Heroku.
 
 ## Authors
 

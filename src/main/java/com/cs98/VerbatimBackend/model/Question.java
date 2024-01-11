@@ -34,4 +34,19 @@ public class Question {
 
     @OneToMany(mappedBy = "q3", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GlobalChallenge> globalChallengeQ3;
+
+    @OneToMany(mappedBy = "q1", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StandardChallenge> standardChallengeQ1;
+
+    @OneToMany(mappedBy = "q2", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StandardChallenge> standardChallengeQ2;
+
+    @OneToMany(mappedBy = "q3", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StandardChallenge> standardChallengeQ3;
+
+    @OneToMany(mappedBy = "q4", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StandardChallenge> standardChallengeQ4;
+
+    @OneToMany(mappedBy = "q5", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StandardChallenge> standardChallengeQ5;
 }
