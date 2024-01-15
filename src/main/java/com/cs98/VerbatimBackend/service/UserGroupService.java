@@ -48,6 +48,10 @@ public class UserGroupService {
 
         for (String username : request.getUsernamesToAdd()) {
             User userToAdd = userRepository.findByUsername(username);
+
+            if (ObjectUtils.isEmpty(userToAdd)) {
+                return null;
+            }
             UserGroupJunction groupMember = UserGroupJunction.builder()
                     .user(userToAdd)
                     .group(group)
