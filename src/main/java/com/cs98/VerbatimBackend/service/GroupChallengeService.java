@@ -2,11 +2,14 @@ package com.cs98.VerbatimBackend.service;
 
 import com.cs98.VerbatimBackend.model.*;
 import com.cs98.VerbatimBackend.repository.*;
+import com.cs98.VerbatimBackend.request.SubmitGroupChallengeAnswerRequest;
 import com.cs98.VerbatimBackend.response.CreateCustomChallengeResponse;
 import com.cs98.VerbatimBackend.response.CreateStandardChallengeResponse;
+import com.cs98.VerbatimBackend.response.GroupChallengeUserSpecificResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -154,4 +157,14 @@ public class GroupChallengeService {
             return questions;
         }
     }
+
+//    public GroupChallengeUserSpecificResponse submitGroupResponse(SubmitGroupChallengeAnswerRequest request) {
+//        User respondingUser = userRepository.findByUsername(request.getUsername());
+//        if (ObjectUtils.isEmpty(respondingUser)) {
+//            throw new RuntimeException("could not submit response because user was not found in database");
+//        }
+//        // TODO: finish this
+//
+//        return null;
+//    }
 }

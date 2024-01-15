@@ -5,9 +5,13 @@ import com.cs98.VerbatimBackend.model.*;
 import com.cs98.VerbatimBackend.repository.*;
 import com.cs98.VerbatimBackend.request.CustomChallengeRequest;
 import com.cs98.VerbatimBackend.request.StandardChallengeRequest;
+import com.cs98.VerbatimBackend.request.SubmitGroupChallengeAnswerRequest;
 import com.cs98.VerbatimBackend.response.CreateCustomChallengeResponse;
 import com.cs98.VerbatimBackend.response.CreateStandardChallengeResponse;
+import com.cs98.VerbatimBackend.response.GlobalChallengeUserSpecificResponse;
+import com.cs98.VerbatimBackend.response.GroupChallengeUserSpecificResponse;
 import com.cs98.VerbatimBackend.service.GroupChallengeService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
@@ -115,6 +119,29 @@ public class GroupChallengeController {
             response.add(groupChallengeService.getStandardChallengeQuestions(groupChallenge));
         }
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("api/v1/submitGroupResponse")
+    public ResponseEntity<GroupChallengeUserSpecificResponse> submitGroupChallengeResponse(
+            @NotNull @RequestBody SubmitGroupChallengeAnswerRequest request) {
+
+        User user = userRepository.findByUsername(request.getUsername());
+        GroupChallenge challenge = groupChallengeRepository.findById(request.getChallengeId());
+
+        if (ObjectUtils.isEmpty(user)) { // make sure user exists
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
+        if (ObjectUtils.isEmpty(challenge)) { // make sure challenge exists
+            return ResponseEntity.status(Status.GROUP_CHALLENGE_NOT_FOUND).build();
+        }
+
+        GroupChallengeUserSpecificResponse response = groupChallengeService.submitGroupResponse(request);
+
+        if (ObjectUtils.isEmpty(response)) {
+            throw new RuntimeException("failed to build response");
+        }
         return ResponseEntity.ok(response);
     }
 }
