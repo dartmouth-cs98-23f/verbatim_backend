@@ -1,6 +1,8 @@
 package com.cs98.VerbatimBackend.controller;
 
 import com.cs98.VerbatimBackend.model.User;
+import com.cs98.VerbatimBackend.model.UserRelationship;
+import com.cs98.VerbatimBackend.repository.UserRelationshipRepository;
 import com.cs98.VerbatimBackend.repository.UserRepository;
 import com.cs98.VerbatimBackend.request.RegisterRequest;
 import com.cs98.VerbatimBackend.request.ResetPasswordRequest;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cs98.VerbatimBackend.request.AccountSettingsRequest;
 import com.cs98.VerbatimBackend.misc.Status;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -20,6 +24,9 @@ public class AccountSettingsController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserRelationshipRepository userRelationshipRepository;
 
     @PostMapping(path = "api/v1/accountSettings")
     public ResponseEntity<User> accountSettings(@RequestBody AccountSettingsRequest request) {
@@ -116,5 +123,38 @@ public class AccountSettingsController {
         } else {
             return ResponseEntity.status(Status.BAD_REQUEST).build();
         }
+    }
+
+    @PostMapping (path = "api/v1/getUserStats")
+    public ResponseEntity<List<Integer>> getUserStats(@RequestBody String username) {
+        User user;
+        // if user does not exist, return bad request
+        if (!userRepository.existsByUsername(username)) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+        // if the user exists, update changed fields
+        else  {
+            user = userRepository.findByUsername(username);
+        }
+
+        // get the user's stats
+        int streak = user.getStreak();
+        int customChal = user.getNumCustomChallengesCompleted();
+        int globalChal = user.getNumGlobalChallengesCompleted();
+
+        // get the user's friends
+        List<UserRelationship> friends = userRelationshipRepository.findActiveFriendsByUserId(user.getId());
+        int numFriends = friends.size();
+
+        // create a list to hold the stats and add the stats
+        List<Integer> stats = new ArrayList<>();
+
+        stats.add(streak);
+        stats.add(customChal);
+        stats.add(globalChal);
+        stats.add(numFriends);
+
+        return ResponseEntity.ok(stats);
+
     }
 }
