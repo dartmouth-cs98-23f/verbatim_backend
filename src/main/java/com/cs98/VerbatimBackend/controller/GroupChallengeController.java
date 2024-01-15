@@ -94,4 +94,27 @@ public class GroupChallengeController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("api/v1/getChallengeQs")
+    public ResponseEntity<List<Object>> getChallengeQs(@RequestBody int challengeId) {
+        GroupChallenge groupChallenge;
+
+        // check that the challenge exists
+        if (ObjectUtils.isEmpty(groupChallengeRepository.findById(challengeId))) {
+            return ResponseEntity.status(Status.GROUP_CHALLENGE_NOT_FOUND).build();
+        } else {
+            groupChallenge = groupChallengeRepository.findById(challengeId);
+        }
+
+        // create an object list to hold the response
+        List<Object> response = new ArrayList<>();
+
+        if (groupChallenge.getIsCustom()) {
+            response.add(groupChallengeService.getCustomChallengeQuestions(groupChallenge));
+        } else {
+            response.add(groupChallengeService.getStandardChallengeQuestions(groupChallenge));
+        }
+
+        return ResponseEntity.ok(response);
+    }
 }

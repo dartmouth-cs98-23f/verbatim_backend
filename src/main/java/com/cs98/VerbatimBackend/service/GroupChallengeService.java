@@ -6,6 +6,7 @@ import com.cs98.VerbatimBackend.response.CreateCustomChallengeResponse;
 import com.cs98.VerbatimBackend.response.CreateStandardChallengeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -116,5 +117,41 @@ public class GroupChallengeService {
                 .groupChallenge(groupChallenge)
                 .questionList(customQuestions)
                 .build();
+    }
+
+    public List<Question> getStandardChallengeQuestions(GroupChallenge challenge) {
+        StandardChallenge standardChallenge = standardChallengeRepository.findByChallenge(challenge);
+
+        if (ObjectUtils.isEmpty(standardChallenge)) { // make sure challenge exists
+            throw new RuntimeException("failed to find challenge");
+        } else {
+
+            // create a list of all the questions
+            List<Question> questions = new ArrayList<>();
+            questions.add(standardChallenge.getQ1());
+            questions.add(standardChallenge.getQ2());
+            questions.add(standardChallenge.getQ3());
+            questions.add(standardChallenge.getQ4());
+            questions.add(standardChallenge.getQ5());
+
+            return questions;
+        }
+    }
+
+    public List<CustomQuestion> getCustomChallengeQuestions(GroupChallenge challenge) {
+        List<CustomChallenge> customChallenges = customChallengeRepository.findAllByChallenge(challenge);
+
+        if (ObjectUtils.isEmpty(customChallenges)) { // make sure challenge exists
+            throw new RuntimeException("failed to find challenge");
+        } else {
+
+            // create a list of all the questions
+            List<CustomQuestion> questions = new ArrayList<>();
+            for (CustomChallenge challengeRow: customChallenges) {
+                questions.add(challengeRow.getQuestion());
+            }
+
+            return questions;
+        }
     }
 }
