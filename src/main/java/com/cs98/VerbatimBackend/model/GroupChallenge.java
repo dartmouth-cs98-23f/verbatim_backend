@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Builder
@@ -28,6 +29,10 @@ public class GroupChallenge {
     private UserGroup group;
 
     private Boolean isCustom;
+
+    private Date date;
+
+    private boolean isActive;
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomChallenge> customChallenges;
