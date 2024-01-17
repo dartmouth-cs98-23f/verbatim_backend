@@ -5,6 +5,7 @@ import com.cs98.VerbatimBackend.repository.*;
 import com.cs98.VerbatimBackend.request.SubmitGroupChallengeAnswerRequest;
 import com.cs98.VerbatimBackend.response.CreateCustomChallengeResponse;
 import com.cs98.VerbatimBackend.response.CreateStandardChallengeResponse;
+import com.cs98.VerbatimBackend.response.GroupAnswers;
 import com.cs98.VerbatimBackend.response.GroupChallengeUserSpecificResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,9 @@ import org.springframework.util.ObjectUtils;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GroupChallengeService {
@@ -44,6 +47,9 @@ public class GroupChallengeService {
 
     @Autowired
     private StandardChallengeUserResponseRepository standardChallengeUserResponseRepository;
+
+    @Autowired
+    private CustomChallengeUserResponseRepository customChallengeUserResponseRepository;
 
     public GroupChallenge createGroupChallenge(User createdByUser, UserGroup group, boolean isCustom) {
 
@@ -192,11 +198,13 @@ public class GroupChallengeService {
     }
 
     public GroupChallengeUserSpecificResponse submitStandardResponse(SubmitGroupChallengeAnswerRequest request) {
+        GroupChallenge challenge = groupChallengeRepository.findById(request.getChallengeId());
         StandardChallenge standardChallenge = standardChallengeRepository
-                .findByChallenge(groupChallengeRepository.findById(request.getChallengeId()));
+                .findByChallenge(challenge);
         User user = userRepository.findByUsername(request.getUsername());
         List<String> responses = request.getResponses();
 
+        // build the response
         StandardChallengeResponse standardChallengeResponse = StandardChallengeResponse.builder()
                 .challenge(standardChallenge)
                 .user(user)
@@ -209,15 +217,106 @@ public class GroupChallengeService {
 
         standardChallengeUserResponseRepository.save(standardChallengeResponse);
 
-        return loadGroupChallengeStatsForUser(user, standardChallengeResponse);
+        return loadGroupChallengeStatsForUser(user, challenge);
     }
 
-    // TODO
     public GroupChallengeUserSpecificResponse submitCustomResponse(SubmitGroupChallengeAnswerRequest request) {
+        GroupChallenge challenge = groupChallengeRepository.findById(request.getChallengeId());
+        List<CustomChallenge> customChallenges = customChallengeRepository
+                .findAllByChallenge(challenge);
+        User user = userRepository.findByUsername(request.getUsername());
 
+        // get the challenge questions
+        List<CustomQuestion> questions = getCustomChallengeQuestions(challenge);
+
+        // build the custom challenge responses
+        for(int i = 0; i < customChallenges.size(); i++) {
+            CustomChallengeResponse customChallengeResponse = CustomChallengeResponse.builder()
+                    .challenge(customChallenges.get(i))
+                    .user(user)
+                    .question(questions.get(i))
+                    .response(request.getResponses().get(i))
+                    .build();
+
+            customChallengeUserResponseRepository.save(customChallengeResponse);
+        }
+
+        return loadGroupChallengeStatsForUser(user, challenge);
     }
 
-    private GroupChallengeUserSpecificResponse loadGroupChallengeStatsForUser(User user, StandardChallengeResponse standardChallengeResponse) {
+    private GroupChallengeUserSpecificResponse loadGroupChallengeStatsForUser(User user, GroupChallenge challenge) {
+        GroupChallengeUserSpecificResponse response;
 
+        // build response for custom challenge
+        if (challenge.getIsCustom()) {
+            // TODO
+            response = GroupChallengeUserSpecificResponse.builder().build();
+        } else { // build response for standard challenge
+
+            // get the Standard Challenge
+            StandardChallenge standardChallenge = standardChallengeRepository.findByChallenge(challenge);
+
+            // get the questions
+            List<Question> questions = getStandardChallengeQuestions(challenge);
+
+            // get all responses
+            List<StandardChallengeResponse> challengeResponses = standardChallengeUserResponseRepository
+                    .findAllByChallenge(challenge);
+
+            // create the maps to hold answers
+            Map<String, String> responseQ1 = new HashMap<>();
+            Map<String, String> responseQ2 = new HashMap<>();
+            Map<String, String> responseQ3 = new HashMap<>();
+            Map<String, String> responseQ4 = new HashMap<>();
+            Map<String, String> responseQ5 = new HashMap<>();
+
+            // add responses to the maps
+            for (StandardChallengeResponse challengeResponse: challengeResponses) {
+                String username = challengeResponse.getUser().getUsername();
+                responseQ1.put(username, challengeResponse.getResponseQ1());
+                responseQ2.put(username, challengeResponse.getResponseQ2());
+                responseQ3.put(username, challengeResponse.getResponseQ3());
+                responseQ4.put(username, challengeResponse.getResponseQ4());
+                responseQ5.put(username, challengeResponse.getResponseQ5());
+            }
+
+            // create Group Answers
+            List<GroupAnswers> groupAnswers = new ArrayList<>();
+            groupAnswers.add(GroupAnswers.builder()
+                    .question(String.valueOf(questions.get(0)))
+                    .responses(responseQ1)
+                    .build());
+            groupAnswers.add(GroupAnswers.builder()
+                    .question(String.valueOf(questions.get(1)))
+                    .responses(responseQ2)
+                    .build());
+            groupAnswers.add(GroupAnswers.builder()
+                    .question(String.valueOf(questions.get(2)))
+                    .responses(responseQ3)
+                    .build());
+            groupAnswers.add(GroupAnswers.builder()
+                    .question(String.valueOf(questions.get(3)))
+                    .responses(responseQ4)
+                    .build());
+            groupAnswers.add(GroupAnswers.builder()
+                    .question(String.valueOf(questions.get(4)))
+                    .responses(responseQ5)
+                    .build());
+
+            int totalResponses = challengeResponses.size();
+
+            response = GroupChallengeUserSpecificResponse.builder()
+                    .groupChallenge(challenge)
+                    .groupAnswers(groupAnswers)
+                    .totalResponses(totalResponses)
+                    .build();
+
+        }
+
+        if (ObjectUtils.isEmpty(response)) { // make sure the response is not empty
+            throw new RuntimeException("could not build response");
+        }
+
+        return response;
     }
 }
