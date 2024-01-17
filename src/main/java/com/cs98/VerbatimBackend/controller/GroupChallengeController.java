@@ -40,13 +40,19 @@ public class GroupChallengeController {
     @Autowired
     private GroupChallengeService groupChallengeService;
 
+    @Autowired
+    private UserGroupJunctionRepository userGroupJunctionRepository;
+
     @PostMapping("api/v1/createStandardChallenge")
     public ResponseEntity<CreateStandardChallengeResponse> createStandardChallenge(@RequestBody StandardChallengeRequest request) {
         User createdByUser = userRepository.findByUsername(request.getCreatedByUsername());
         UserGroup group = userGroupRepository.findById(request.getGroupId());
         CreateStandardChallengeResponse response;
 
-        // TODO: check if createdByUser is in group
+        // check that user is in group
+        if (!userGroupJunctionRepository.existsByGroupAndUser(group, createdByUser)) {
+            return ResponseEntity.status(Status.USER_NOT_IN_GROUP).build();
+        }
 
         if (ObjectUtils.isEmpty(createdByUser)) { // check that user exists
             return ResponseEntity.status(Status.USER_NOT_FOUND).build();
