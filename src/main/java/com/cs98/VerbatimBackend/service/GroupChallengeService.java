@@ -9,7 +9,6 @@ import com.cs98.VerbatimBackend.response.GroupChallengeUserSpecificResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -42,6 +41,9 @@ public class GroupChallengeService {
 
     @Autowired
     private CustomChallengeRepository customChallengeRepository;
+
+    @Autowired
+    private StandardChallengeUserResponseRepository standardChallengeUserResponseRepository;
 
     public GroupChallenge createGroupChallenge(User createdByUser, UserGroup group, boolean isCustom) {
 
@@ -158,13 +160,64 @@ public class GroupChallengeService {
         }
     }
 
-//    public GroupChallengeUserSpecificResponse submitGroupResponse(SubmitGroupChallengeAnswerRequest request) {
-//        User respondingUser = userRepository.findByUsername(request.getUsername());
-//        if (ObjectUtils.isEmpty(respondingUser)) {
-//            throw new RuntimeException("could not submit response because user was not found in database");
-//        }
-//        // TODO: finish this
-//
-//        return null;
-//    }
+    public GroupChallengeUserSpecificResponse submitGroupResponse(SubmitGroupChallengeAnswerRequest request) {
+        User respondingUser = userRepository.findByUsername(request.getUsername());
+        GroupChallenge challenge = groupChallengeRepository.findById(request.getChallengeId());
+
+        if (ObjectUtils.isEmpty(respondingUser)) {
+            throw new RuntimeException("could not submit response because user was not found in database");
+        }
+        if (ObjectUtils.isEmpty(challenge)) {
+            throw new RuntimeException("could not submit response because challenge was not found in database");
+        }
+
+        // create a standard or custom challenge response
+        GroupChallengeUserSpecificResponse response;
+
+        if (challenge.getIsCustom()) {
+            response = submitCustomResponse(request);
+        } else {
+            response = submitStandardResponse(request);
+        }
+
+        if (ObjectUtils.isEmpty(response)) { // make sure the response is not empty
+            throw new RuntimeException("could not build response");
+        }
+
+        // update the user's stats
+        respondingUser.setNumCustomChallengesCompleted(respondingUser.getNumCustomChallengesCompleted() + 1);
+        userRepository.save(respondingUser);
+
+        return response;
+    }
+
+    public GroupChallengeUserSpecificResponse submitStandardResponse(SubmitGroupChallengeAnswerRequest request) {
+        StandardChallenge standardChallenge = standardChallengeRepository
+                .findByChallenge(groupChallengeRepository.findById(request.getChallengeId()));
+        User user = userRepository.findByUsername(request.getUsername());
+        List<String> responses = request.getResponses();
+
+        StandardChallengeResponse standardChallengeResponse = StandardChallengeResponse.builder()
+                .challenge(standardChallenge)
+                .user(user)
+                .responseQ1(responses.get(0))
+                .responseQ2(responses.get(1))
+                .responseQ3(responses.get(2))
+                .responseQ4(responses.get(3))
+                .responseQ5(responses.get(4))
+                .build();
+
+        standardChallengeUserResponseRepository.save(standardChallengeResponse);
+
+        return loadGroupChallengeStatsForUser(user, standardChallengeResponse);
+    }
+
+    // TODO
+    public GroupChallengeUserSpecificResponse submitCustomResponse(SubmitGroupChallengeAnswerRequest request) {
+
+    }
+
+    private GroupChallengeUserSpecificResponse loadGroupChallengeStatsForUser(User user, StandardChallengeResponse standardChallengeResponse) {
+
+    }
 }
