@@ -12,4 +12,6 @@ public class Status {
     public static final int GROUP_CHALLENGE_NOT_FOUND = 466;
     public static final int ACTIVE_CHALLENGE_MAX = 467;
 
+    public static final int GROUP_CREATION_FAILED = 468;
+
 }
