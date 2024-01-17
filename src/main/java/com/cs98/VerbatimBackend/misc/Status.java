@@ -11,4 +11,6 @@ public class Status {
     public static final int GROUP_NOT_FOUND = 465;
     public static final int GROUP_CHALLENGE_NOT_FOUND = 466;
 
+    public static final int GROUP_CREATION_FAILED = 468;
+
 }
