@@ -250,7 +250,53 @@ public class GroupChallengeService {
         // build response for custom challenge
         if (challenge.getIsCustom()) {
             // TODO
-            response = GroupChallengeUserSpecificResponse.builder().build();
+
+            // get the Custom Challenge rows
+            List<CustomChallenge> customChallenges = customChallengeRepository.findAllByChallenge(challenge);
+
+            // get the questions
+            List<CustomQuestion> questions = getCustomChallengeQuestions(challenge);
+
+            // get all responses
+            List<CustomChallengeResponse> challengeResponses = customChallengeUserResponseRepository
+                    .findAllByChallenge(challenge);
+
+            // create group answers
+            List<GroupAnswers> groupAnswers = new ArrayList<>();
+            int totalResponses = 0;
+
+            for (CustomQuestion question: questions) { // loop through questions
+                Map<String, String> responseQ = new HashMap<>(); // create the response map
+                String content = question.getContent(); // get the question content
+
+                // loop through all responses
+                for (CustomChallengeResponse customChallengeResponse: challengeResponses) {
+
+                    // if the response question matches the current question
+                    if (customChallengeResponse.getQuestion().getId().equals(question.getId())) {
+                        // add the response to the response map
+                        responseQ.put(customChallengeResponse.getUser().getUsername(),
+                                customChallengeResponse.getResponse());
+                    }
+
+                    totalResponses = responseQ.size();
+                }
+
+                // add the map to the group answers list
+                groupAnswers.add(GroupAnswers.builder()
+                        .question(content)
+                        .responses(responseQ)
+                        .build());
+            }
+
+
+
+            response = GroupChallengeUserSpecificResponse.builder()
+                    .groupChallenge(challenge)
+                    .groupAnswers(groupAnswers)
+                    .totalResponses(totalResponses)
+                    .build();
+
         } else { // build response for standard challenge
 
             // get the Standard Challenge
@@ -310,7 +356,6 @@ public class GroupChallengeService {
                     .groupAnswers(groupAnswers)
                     .totalResponses(totalResponses)
                     .build();
-
         }
 
         if (ObjectUtils.isEmpty(response)) { // make sure the response is not empty
