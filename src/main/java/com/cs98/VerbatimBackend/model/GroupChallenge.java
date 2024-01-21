@@ -1,5 +1,6 @@
 package com.cs98.VerbatimBackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,9 +35,11 @@ public class GroupChallenge {
 
     private boolean isActive;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomChallenge> customChallenges;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StandardChallenge> standardChallenges;
 }

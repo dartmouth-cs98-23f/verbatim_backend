@@ -2,6 +2,7 @@ package com.cs98.VerbatimBackend.repository;
 
 import com.cs98.VerbatimBackend.model.GlobalChallengeUserResponse;
 import com.cs98.VerbatimBackend.model.GroupChallenge;
+import com.cs98.VerbatimBackend.model.StandardChallenge;
 import com.cs98.VerbatimBackend.model.StandardChallengeResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,5 +14,5 @@ public interface StandardChallengeUserResponseRepository extends JpaRepository<S
 
     StandardChallengeResponse findByUserIdAndChallenge(int userId, GroupChallenge challenge);
 
-    List<StandardChallengeResponse> findAllByChallenge(GroupChallenge challenge);
+    List<StandardChallengeResponse> findAllByChallenge(StandardChallenge challenge);
 }

@@ -191,7 +191,8 @@ public class GroupChallengeService {
         }
 
         // update the user's stats
-        respondingUser.setNumCustomChallengesCompleted(respondingUser.getNumCustomChallengesCompleted() + 1);
+        int chalsCompleted = respondingUser.getNumCustomChallengesCompleted();
+        respondingUser.setNumCustomChallengesCompleted(chalsCompleted + 1);
         userRepository.save(respondingUser);
 
         return response;
@@ -249,7 +250,6 @@ public class GroupChallengeService {
 
         // build response for custom challenge
         if (challenge.getIsCustom()) {
-            // TODO
 
             // get the Custom Challenge rows
             List<CustomChallenge> customChallenges = customChallengeRepository.findAllByChallenge(challenge);
@@ -307,7 +307,7 @@ public class GroupChallengeService {
 
             // get all responses
             List<StandardChallengeResponse> challengeResponses = standardChallengeUserResponseRepository
-                    .findAllByChallenge(challenge);
+                    .findAllByChallenge(standardChallenge);
 
             // create the maps to hold answers
             Map<String, String> responseQ1 = new HashMap<>();
@@ -329,25 +329,27 @@ public class GroupChallengeService {
             // create Group Answers
             List<GroupAnswers> groupAnswers = new ArrayList<>();
             groupAnswers.add(GroupAnswers.builder()
-                    .question(String.valueOf(questions.get(0)))
+                    .question(String.valueOf(questions.get(0).getContent()))
                     .responses(responseQ1)
                     .build());
             groupAnswers.add(GroupAnswers.builder()
-                    .question(String.valueOf(questions.get(1)))
+                    .question(String.valueOf(questions.get(1).getContent()))
                     .responses(responseQ2)
                     .build());
             groupAnswers.add(GroupAnswers.builder()
-                    .question(String.valueOf(questions.get(2)))
+                    .question(String.valueOf(questions.get(2).getContent()))
                     .responses(responseQ3)
                     .build());
             groupAnswers.add(GroupAnswers.builder()
-                    .question(String.valueOf(questions.get(3)))
+                    .question(String.valueOf(questions.get(3).getContent()))
                     .responses(responseQ4)
                     .build());
             groupAnswers.add(GroupAnswers.builder()
-                    .question(String.valueOf(questions.get(4)))
+                    .question(String.valueOf(questions.get(4).getContent()))
                     .responses(responseQ5)
                     .build());
+
+            System.out.println("created group answers");
 
             int totalResponses = challengeResponses.size();
 
@@ -356,6 +358,7 @@ public class GroupChallengeService {
                     .groupAnswers(groupAnswers)
                     .totalResponses(totalResponses)
                     .build();
+            System.out.println("built response");
         }
 
         if (ObjectUtils.isEmpty(response)) { // make sure the response is not empty
