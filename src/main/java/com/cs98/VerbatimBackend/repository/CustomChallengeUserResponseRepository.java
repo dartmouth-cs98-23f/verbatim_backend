@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface CustomChallengeUserResponseRepository extends JpaRepository<CustomChallengeResponse, Integer> {
-    public List<CustomChallengeResponse> findAllByChallenge(GroupChallenge challenge);
+    public List<CustomChallengeResponse> findAllByGroupChallenge(GroupChallenge groupChallenge);
 }
