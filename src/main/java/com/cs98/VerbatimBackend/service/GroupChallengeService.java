@@ -181,8 +181,14 @@ public class GroupChallengeService {
         GroupChallengeUserSpecificResponse response;
 
         if (challenge.getIsCustom()) {
+            if (customChallengeUserResponseRepository.existsByUserIdAndChallenge(respondingUser.getId(), challenge)) {
+                throw new RuntimeException("User has already completed this group challenge");
+            }
             response = submitCustomResponse(request);
         } else {
+            if (standardChallengeUserResponseRepository.existsByUserIdAndChallenge(respondingUser.getId(), challenge)) {
+                throw new RuntimeException("User has already completed this group challenge");
+            }
             response = submitStandardResponse(request);
         }
 
