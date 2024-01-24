@@ -52,7 +52,7 @@ public class DailyReset {
         }
         userRepository.saveAll(updated_users);
 
-        List<Category> dailyCategories = categoryRepository.fetchThreeRandomCategories();
+        List<Category> dailyCategories = categoryRepository.fetchFiveRandomCategories();
 
 //         get a random question from each category
         List<Question> dailyQuestions = new ArrayList<>();
@@ -67,6 +67,8 @@ public class DailyReset {
                 .q1(dailyQuestions.get(0))
                 .q2(dailyQuestions.get(1))
                 .q3(dailyQuestions.get(2))
+                .q4(dailyQuestions.get(3))
+                .q5(dailyQuestions.get(4))
                 .build();
 
 
