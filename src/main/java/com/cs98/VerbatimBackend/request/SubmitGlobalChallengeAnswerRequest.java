@@ -8,4 +8,6 @@ public class SubmitGlobalChallengeAnswerRequest {
     private String responseQ1;
     private String responseQ2;
     private String responseQ3;
+    private String responseQ4;
+    private String responseQ5;
 }

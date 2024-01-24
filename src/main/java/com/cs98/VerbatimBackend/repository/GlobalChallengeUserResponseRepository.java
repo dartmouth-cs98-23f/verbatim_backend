@@ -21,16 +21,26 @@ public interface GlobalChallengeUserResponseRepository extends JpaRepository<Glo
 
     Integer countByResponseQ3AndGlobalChallengeIdAndUserIdNot(String responseQ3, int challengeId, int userId);
 
+    Integer countByResponseQ4AndGlobalChallengeIdAndUserIdNot(String responseQ4, int challengeId, int userId);
+
+    Integer countByResponseQ5AndGlobalChallengeIdAndUserIdNot(String responseQ5, int challengeId, int userId);
+
     Integer countByResponseQ1AndGlobalChallengeId(String responseQ1, int challengeId);
 
     Integer countByResponseQ2AndGlobalChallengeId(String responseQ1, int challengeId);
 
     Integer countByResponseQ3AndGlobalChallengeId(String responseQ1, int challengeId);
 
-    Integer countByResponseQ1AndResponseQ2AndResponseQ3AndGlobalChallengeIdAndUserIdNot(
+    Integer countByResponseQ4AndGlobalChallengeId(String responseQ4, int challengeId);
+
+    Integer countByResponseQ5AndGlobalChallengeId(String responseQ5, int challengeId);
+
+    Integer countByResponseQ1AndResponseQ2AndResponseQ3AndResponseQ4AndResponseQ5AndGlobalChallengeIdAndUserIdNot(
             String responseQ1,
             String responseQ2,
             String responseQ3,
+            String responseQ4,
+            String responseQ5,
             int challengeId,
             int userId);
 
@@ -97,9 +107,53 @@ public interface GlobalChallengeUserResponseRepository extends JpaRepository<Glo
             String mostPopularQ3,
             String secondMostPopularQ3);
 
+    @Query(value = "SELECT MODE() WITHIN GROUP (ORDER BY responseq4) " +
+            "FROM global_challenge_response WHERE global_challenge_id = ?1",
+            nativeQuery = true)
+    String findMostPopularQ4ResponseByChallengeId(Integer id);
+
+    @Query(value = "SELECT MODE() WITHIN GROUP (ORDER BY responseq4) " +
+            "FROM global_challenge_response WHERE global_challenge_id = ?1 " +
+            "AND responseq4 != ?2",
+            nativeQuery = true)
+    String findSecondMostPopularQ4ResponseByChallengeId(Integer id, String mostPopularQ4);
+
+    @Query(value = "SELECT MODE() WITHIN GROUP (ORDER BY responseq4) " +
+            "FROM global_challenge_response WHERE global_challenge_id = ?1 " +
+            "AND responseq4 != ?2 AND responseq4 != ?3",
+            nativeQuery = true)
+    String findThirdMostPopularQ4ResponseByChallengeId(
+            Integer id,
+            String mostPopularQ3,
+            String secondMostPopularQ4);
+
+    @Query(value = "SELECT MODE() WITHIN GROUP (ORDER BY responseq5) " +
+            "FROM global_challenge_response WHERE global_challenge_id = ?1",
+            nativeQuery = true)
+    String findMostPopularQ5ResponseByChallengeId(Integer id);
+
+    @Query(value = "SELECT MODE() WITHIN GROUP (ORDER BY responseq5) " +
+            "FROM global_challenge_response WHERE global_challenge_id = ?1 " +
+            "AND responseq5 != ?2",
+            nativeQuery = true)
+    String findSecondMostPopularQ5ResponseByChallengeId(Integer id, String mostPopularQ5);
+
+    @Query(value = "SELECT MODE() WITHIN GROUP (ORDER BY responseq5) " +
+            "FROM global_challenge_response WHERE global_challenge_id = ?1 " +
+            "AND responseq5 != ?2 AND responseq5 != ?3",
+            nativeQuery = true)
+    String findThirdMostPopularQ5ResponseByChallengeId(
+            Integer id,
+            String mostPopularQ5,
+            String secondMostPopularQ5);
+
     List<GlobalChallengeUserResponse> findAllByGlobalChallengeIdAndResponseQ1(int globalChallengeId, String responseQ1);
 
     List<GlobalChallengeUserResponse> findAllByGlobalChallengeIdAndResponseQ2(int globalChallengeId, String responseQ2);
 
     List<GlobalChallengeUserResponse> findAllByGlobalChallengeIdAndResponseQ3(int globalChallengeId, String responseQ3);
+
+    List<GlobalChallengeUserResponse> findAllByGlobalChallengeIdAndResponseQ4(int globalChallengeId, String responseQ4);
+
+    List<GlobalChallengeUserResponse> findAllByGlobalChallengeIdAndResponseQ5(int globalChallengeId, String responseQ5);
 }
