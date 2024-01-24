@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface GroupChallengeRepository extends JpaRepository<GroupChallenge, Integer> {
     GroupChallenge findByGroupAndCreatedBy(UserGroup group, User createdBy);
 
-    boolean existsByGroupAndCreatedByAndIsActive(UserGroup group, User createdBy, boolean isActive);
+    GroupChallenge findById(int challengeId);
 }
