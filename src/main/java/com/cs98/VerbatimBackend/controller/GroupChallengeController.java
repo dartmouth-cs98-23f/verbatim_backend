@@ -5,9 +5,13 @@ import com.cs98.VerbatimBackend.model.*;
 import com.cs98.VerbatimBackend.repository.*;
 import com.cs98.VerbatimBackend.request.CustomChallengeRequest;
 import com.cs98.VerbatimBackend.request.StandardChallengeRequest;
+import com.cs98.VerbatimBackend.request.SubmitGroupChallengeAnswerRequest;
 import com.cs98.VerbatimBackend.response.CreateCustomChallengeResponse;
 import com.cs98.VerbatimBackend.response.CreateStandardChallengeResponse;
+import com.cs98.VerbatimBackend.response.GlobalChallengeUserSpecificResponse;
+import com.cs98.VerbatimBackend.response.GroupChallengeUserSpecificResponse;
 import com.cs98.VerbatimBackend.service.GroupChallengeService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
@@ -36,13 +40,19 @@ public class GroupChallengeController {
     @Autowired
     private GroupChallengeService groupChallengeService;
 
+    @Autowired
+    private UserGroupJunctionRepository userGroupJunctionRepository;
+
     @PostMapping("api/v1/createStandardChallenge")
     public ResponseEntity<CreateStandardChallengeResponse> createStandardChallenge(@RequestBody StandardChallengeRequest request) {
         User createdByUser = userRepository.findByUsername(request.getCreatedByUsername());
         UserGroup group = userGroupRepository.findById(request.getGroupId());
         CreateStandardChallengeResponse response;
 
-        // TODO: check if createdByUser is in group
+        // check that user is in group
+        if (!userGroupJunctionRepository.existsByGroupAndUser(group, createdByUser)) {
+            return ResponseEntity.status(Status.USER_NOT_IN_GROUP).build();
+        }
 
         if (ObjectUtils.isEmpty(createdByUser)) { // check that user exists
             return ResponseEntity.status(Status.USER_NOT_FOUND).build();
@@ -50,11 +60,6 @@ public class GroupChallengeController {
 
         if (ObjectUtils.isEmpty(group)) { // check that group exists
             return ResponseEntity.status(Status.GROUP_NOT_FOUND).build();
-        }
-
-        if(groupChallengeRepository // check that user doesn't have active challenge in group
-                .existsByGroupAndCreatedByAndIsActive(group, createdByUser, true)) {
-            return ResponseEntity.status(Status.ACTIVE_CHALLENGE_MAX).build();
         }
 
         // create a group challenge
@@ -85,11 +90,6 @@ public class GroupChallengeController {
             return ResponseEntity.status(Status.GROUP_NOT_FOUND).build();
         }
 
-        if(groupChallengeRepository // check that user doesn't have active challenge in group
-                .existsByGroupAndCreatedByAndIsActive(group, createdByUser, true)) {
-            return ResponseEntity.status(Status.ACTIVE_CHALLENGE_MAX).build();
-        }
-
         // create a group challenge
         GroupChallenge groupChallenge = groupChallengeService
                 .createGroupChallenge(createdByUser, group, true);
@@ -102,6 +102,52 @@ public class GroupChallengeController {
             throw new RuntimeException("failed to build response");
         }
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("api/v1/getChallengeQs")
+    public ResponseEntity<List<Object>> getChallengeQs(@RequestBody int challengeId) {
+        GroupChallenge groupChallenge;
+
+        // check that the challenge exists
+        if (ObjectUtils.isEmpty(groupChallengeRepository.findById(challengeId))) {
+            return ResponseEntity.status(Status.GROUP_CHALLENGE_NOT_FOUND).build();
+        } else {
+            groupChallenge = groupChallengeRepository.findById(challengeId);
+        }
+
+        // create an object list to hold the response
+        List<Object> response = new ArrayList<>();
+
+        if (groupChallenge.getIsCustom()) {
+            response.add(groupChallengeService.getCustomChallengeQuestions(groupChallenge));
+        } else {
+            response.add(groupChallengeService.getStandardChallengeQuestions(groupChallenge));
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("api/v1/submitGroupResponse")
+    public ResponseEntity<GroupChallengeUserSpecificResponse> submitGroupChallengeResponse(
+            @NotNull @RequestBody SubmitGroupChallengeAnswerRequest request) {
+
+        User user = userRepository.findByUsername(request.getUsername());
+        GroupChallenge challenge = groupChallengeRepository.findById(request.getChallengeId());
+
+        if (ObjectUtils.isEmpty(user)) { // make sure user exists
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
+        if (ObjectUtils.isEmpty(challenge)) { // make sure challenge exists
+            return ResponseEntity.status(Status.GROUP_CHALLENGE_NOT_FOUND).build();
+        }
+
+        GroupChallengeUserSpecificResponse response = groupChallengeService.submitGroupResponse(request);
+
+        if (ObjectUtils.isEmpty(response)) {
+            throw new RuntimeException("failed to build response");
+        }
         return ResponseEntity.ok(response);
     }
 }

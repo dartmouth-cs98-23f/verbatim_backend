@@ -16,5 +16,5 @@ public interface GroupChallengeRepository extends JpaRepository<GroupChallenge, 
 
     List<GroupChallenge> findByGroupAndIsActive(UserGroup group);
 
-
+    GroupChallenge findById(int challengeId);
 }

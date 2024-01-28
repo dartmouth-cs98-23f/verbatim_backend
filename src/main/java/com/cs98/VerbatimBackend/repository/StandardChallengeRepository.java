@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StandardChallengeRepository extends JpaRepository<StandardChallenge, Integer> {
 
+    StandardChallenge findByChallenge(GroupChallenge challenge);
+
 }
