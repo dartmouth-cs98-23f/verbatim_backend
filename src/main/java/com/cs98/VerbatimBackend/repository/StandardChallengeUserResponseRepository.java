@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface StandardChallengeUserResponseRepository extends JpaRepository<StandardChallengeResponse, Integer> {
 
-    Boolean existsByUserIdAndChallenge(int userId, GroupChallenge challenge);
+    Boolean existsByUserIdAndChallengeId(int userId, int challengeId);
 
     List<StandardChallengeResponse> findAllByChallenge(StandardChallenge challenge);
 
