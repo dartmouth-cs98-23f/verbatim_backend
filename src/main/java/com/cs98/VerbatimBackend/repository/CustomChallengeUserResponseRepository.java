@@ -14,4 +14,6 @@ public interface CustomChallengeUserResponseRepository extends JpaRepository<Cus
     public List<CustomChallengeResponse> findAllByGroupChallenge(GroupChallenge groupChallenge);
 
     Boolean existsByUserIdAndChallenge(int userId, GroupChallenge challenge);
+
+    List<CustomChallengeResponse> findByGroupChallengeIdIn(List<Integer> challengeIds);
 }

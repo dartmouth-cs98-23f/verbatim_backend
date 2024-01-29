@@ -14,7 +14,9 @@ public interface GroupChallengeRepository extends JpaRepository<GroupChallenge, 
 
     boolean existsByGroupAndCreatedByAndIsActive(UserGroup group, User createdBy, boolean isActive);
 
-    List<GroupChallenge> findByGroupAndIsActive(UserGroup group);
+    List<GroupChallenge> findByGroupAndIsActiveTrue(UserGroup group);
+
+    List<GroupChallenge> findByGroup(UserGroup group);
 
     GroupChallenge findById(int challengeId);
 }

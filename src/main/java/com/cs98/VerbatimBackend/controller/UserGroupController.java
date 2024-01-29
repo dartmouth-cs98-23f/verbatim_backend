@@ -90,6 +90,12 @@ public class UserGroupController {
     public ResponseEntity<GroupStats> getGroupStats(@PathVariable int groupId) {
         GroupStats stats = userGroupService.getStats(groupId);
 
+        if (ObjectUtils.isEmpty(stats)) {
+            return ResponseEntity.status(Status.FETCH_GROUP_STATS_FAILED).build();
+        }
+
+        return ResponseEntity.ok(stats);
+
     }
 
 

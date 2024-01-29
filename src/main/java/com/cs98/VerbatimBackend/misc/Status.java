@@ -19,4 +19,6 @@ public class Status {
     public static final int USER_ADDED_TO_GROUP_FAILED = 470;
     public static final int USER_GROUP_REMOVAL_FAILED = 471;
 
+    public static final int FETCH_GROUP_STATS_FAILED = 472;
+
 }
