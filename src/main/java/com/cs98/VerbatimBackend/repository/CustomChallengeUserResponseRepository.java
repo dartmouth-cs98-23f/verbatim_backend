@@ -13,5 +13,6 @@ import java.util.List;
 public interface CustomChallengeUserResponseRepository extends JpaRepository<CustomChallengeResponse, Integer> {
     public List<CustomChallengeResponse> findAllByGroupChallenge(GroupChallenge groupChallenge);
 
+    List<CustomChallengeResponse> findByGroupChallengeIdIn(List<Integer> challengeIds);
     Boolean existsByUserIdAndChallengeId(int userId, int challengeId);
 }

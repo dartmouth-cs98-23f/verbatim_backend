@@ -15,4 +15,7 @@ public interface StandardChallengeUserResponseRepository extends JpaRepository<S
     Boolean existsByUserIdAndChallengeId(int userId, int challengeId);
 
     List<StandardChallengeResponse> findAllByChallenge(StandardChallenge challenge);
+
+    List<StandardChallengeResponse> findByChallengeIdIn(List<Integer> challengeIds);
+
 }
