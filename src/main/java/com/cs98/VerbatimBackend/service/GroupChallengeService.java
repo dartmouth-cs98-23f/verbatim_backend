@@ -181,12 +181,12 @@ public class GroupChallengeService {
         GroupChallengeUserSpecificResponse response;
 
         if (challenge.getIsCustom()) {
-            if (customChallengeUserResponseRepository.existsByUserIdAndChallenge(respondingUser.getId(), challenge)) {
+            if (customChallengeUserResponseRepository.existsByUserIdAndChallengeId(respondingUser.getId(), challenge.getId())) {
                 throw new RuntimeException("User has already completed this group challenge");
             }
             response = submitCustomResponse(request);
         } else {
-            if (standardChallengeUserResponseRepository.existsByUserIdAndChallenge(respondingUser.getId(), challenge)) {
+            if (standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(respondingUser.getId(), challenge.getId())) {
                 throw new RuntimeException("User has already completed this group challenge");
             }
             response = submitStandardResponse(request);
@@ -200,8 +200,6 @@ public class GroupChallengeService {
         int chalsCompleted = respondingUser.getNumCustomChallengesCompleted();
         respondingUser.setNumCustomChallengesCompleted(chalsCompleted + 1);
         userRepository.save(respondingUser);
-
-        System.out.println("submitGroupResponse ran successfully");
 
         return response;
     }
@@ -226,7 +224,6 @@ public class GroupChallengeService {
 
         standardChallengeUserResponseRepository.save(standardChallengeResponse);
 
-        System.out.println("submitStandardResponse ran successfully");
         return loadGroupChallengeStatsForUser(user, challenge);
     }
 
@@ -252,8 +249,6 @@ public class GroupChallengeService {
             customChallengeUserResponseRepository.save(customChallengeResponse);
         }
 
-        System.out.println("submitCustomResponse ran successfully");
-
         return loadGroupChallengeStatsForUser(user, challenge);
     }
 
@@ -266,18 +261,12 @@ public class GroupChallengeService {
             // get the Custom Challenge rows
             List<CustomChallenge> customChallenges = customChallengeRepository.findAllByChallenge(challenge);
 
-            System.out.println("got custom challenges");
-
             // get the questions
             List<CustomQuestion> questions = getCustomChallengeQuestions(challenge);
-
-            System.out.println("got questions");
 
             // get all responses
             List<CustomChallengeResponse> challengeResponses = customChallengeUserResponseRepository
                     .findAllByGroupChallenge(challenge);
-
-            System.out.println("got responses");
 
             // create group answers
             List<GroupAnswers> groupAnswers = new ArrayList<>();
@@ -286,46 +275,32 @@ public class GroupChallengeService {
             for (CustomQuestion question: questions) { // loop through questions
                 Map<String, String> responseQ = new HashMap<>(); // create the response map
                 String content = question.getContent(); // get the question content
-                System.out.println("getting responses for question: " + content);
 
                 // loop through all responses
                 for (CustomChallengeResponse customChallengeResponse: challengeResponses) {
 
                     // if the response question matches the current question
-                    // TODO: DEBUG THIS!!!
-                    System.out.println("response question id: " + customChallengeResponse.getQuestion().getId());
-                    System.out.println("custom question id: " + question.getId());
                     if (customChallengeResponse.getQuestion().getId().equals(question.getId())) {
                         // add the response to the response map
-                        System.out.println("IDs match!");
                         responseQ.put(customChallengeResponse.getUser().getUsername(),
                                 customChallengeResponse.getResponse());
-                        System.out.println(responseQ.toString());
                     }
 
                     totalResponses = responseQ.size();
                 }
-
-                System.out.println("got " + totalResponses + " for this question");
 
                 // add the map to the group answers list
                 groupAnswers.add(GroupAnswers.builder()
                         .question(content)
                         .responses(responseQ)
                         .build());
-
-                System.out.println("added responses to group answers");
             }
-
-
 
             response = GroupChallengeUserSpecificResponse.builder()
                     .groupChallenge(challenge)
                     .groupAnswers(groupAnswers)
                     .totalResponses(totalResponses)
                     .build();
-
-            System.out.println("built the response");
 
         } else { // build response for standard challenge
 

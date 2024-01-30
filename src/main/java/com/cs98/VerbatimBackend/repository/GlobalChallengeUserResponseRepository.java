@@ -12,6 +12,8 @@ public interface GlobalChallengeUserResponseRepository extends JpaRepository<Glo
 
     GlobalChallengeUserResponse findByUserIdAndGlobalChallengeId(int userId, int globalChallengeId);
 
+    List<GlobalChallengeUserResponse> findByUserIdIn(List<Integer> userIds);
+
     List<GlobalChallengeUserResponse> findByGlobalChallengeIdAndUserIdIn(int globalChallengeId, List<Integer> userIdList);
     Integer countByGlobalChallengeId(int id);
 
