@@ -12,6 +12,7 @@ import com.cs98.VerbatimBackend.model.GlobalChallenge;
 import com.cs98.VerbatimBackend.model.GlobalChallengeUserResponse;
 import com.cs98.VerbatimBackend.model.User;
 import com.cs98.VerbatimBackend.request.SubmitGlobalChallengeAnswerRequest;
+import com.cs98.VerbatimBackend.response.GlobalChallengeUserSpecificResponseWithUser;
 import com.cs98.VerbatimBackend.service.GlobalChallengeService;
 import com.cs98.VerbatimBackend.service.UserService;
 import org.jetbrains.annotations.NotNull;
@@ -109,7 +110,7 @@ public class GlobalChallengeController {
     }
 
     @PostMapping(path = "api/v1/submitResponseAfterLoginOrRegister")
-    public ResponseEntity<GlobalChallengeUserSpecificResponse> submitResponseAfterLoginOrRegister(@RequestBody SubmitGlobalChallengeAnswerRequestWithSignIn request) {
+    public ResponseEntity<GlobalChallengeUserSpecificResponseWithUser> submitResponseAfterLoginOrRegister(@RequestBody SubmitGlobalChallengeAnswerRequestWithSignIn request) {
         User userEntityToReturn;
         if (request.getIsLogin()) {
             UserDetailsPrincipal userToAuthenticate = userService.loadUserByUsername(request.getEmailOrUsername());
@@ -166,10 +167,34 @@ public class GlobalChallengeController {
 
         GlobalChallengeUserSpecificResponse response = globalChallengeService.submitGlobalResponse(submitAnswerRequest);
 
+
+        GlobalChallengeUserSpecificResponseWithUser responseWithUser = GlobalChallengeUserSpecificResponseWithUser.builder()
+                .responseQ1(response.getResponseQ1())
+                .responseQ2(response.getResponseQ2())
+                .responseQ3(response.getResponseQ3())
+                .numVerbatimQ1(response.getNumVerbatimQ1())
+                .numVerbatimQ2(response.getNumVerbatimQ2())
+                .numVerbatimQ3(response.getNumVerbatimQ3())
+                .numExactVerbatim(response.getNumExactVerbatim())
+                .statsQ1(response.getStatsQ1())
+                .statsQ2(response.getStatsQ2())
+                .statsQ3(response.getStatsQ3())
+                .verbatasticUsers(response.getVerbatasticUsers())
+                .globalChallengeId(response.getGlobalChallengeId())
+                .totalResponses(response.getTotalResponses())
+                .globalChallengeId(response.getGlobalChallengeId())
+                .q1(response.getQ1())
+                .q2(response.getQ2())
+                .q3(response.getQ3())
+                .categoryQ1(response.getCategoryQ1())
+                .categoryQ2(response.getCategoryQ2())
+                .categoryQ3(response.getCategoryQ3())
+                .user(userEntityToReturn)
+                .build();
         if (ObjectUtils.isEmpty(response)) {
             throw new RuntimeException("failed to build response");
         }
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(responseWithUser);
 
     }
 
