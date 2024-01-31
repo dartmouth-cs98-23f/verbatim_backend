@@ -4,6 +4,7 @@ import com.cs98.VerbatimBackend.model.User;
 import com.cs98.VerbatimBackend.model.UserGroup;
 import com.cs98.VerbatimBackend.model.UserGroupJunction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,4 +19,16 @@ public interface UserGroupJunctionRepository extends JpaRepository<UserGroupJunc
     Boolean existsByUserIdAndGroupId(Integer userId, Integer groupId);
 
     UserGroupJunction findByUserIdAndGroupId(Integer userId, Integer groupId);
+
+    @Query(value = "SELECT group_id FROM user_group_junction " +
+            "WHERE user_id IN (?1, ?2) " +
+            "GROUP BY group_id " +
+            "HAVING COUNT(DISTINCT user_id) = 2 " +
+            "AND COUNT(*) = 2 " +
+            "AND NOT EXISTS (SELECT 1 " +
+            "FROM user_group_junction as t2 " +
+            "WHERE t2.group_id = user_group_junction.group_id " +
+            "AND t2.user_id NOT IN (?1, ?2))",
+            nativeQuery = true)
+    int getGroupIdForFriendGroup(int user1Id, int user2Id);
 }
