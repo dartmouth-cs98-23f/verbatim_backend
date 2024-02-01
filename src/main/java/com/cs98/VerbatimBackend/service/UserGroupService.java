@@ -92,7 +92,8 @@ public class UserGroupService {
             return null;
         }
 
-        List<UserGroupJunction> userToGroups = userGroupJunctionRepository.findByUserId(user.getId());
+        // make sure to exclude friendship groups
+        List<UserGroupJunction> userToGroups = userGroupJunctionRepository.findMultiGroupsByUserId(user.getId());
 
         List<UserGroup> groups = new ArrayList<>();
         for (UserGroupJunction userGroup : userToGroups) {
@@ -154,6 +155,7 @@ public class UserGroupService {
 
         return GetActiveChallengesResponse.builder()
                 .activeChallenges(challenges)
+                .groupId(groupId)
                 .build();
     }
 
@@ -213,6 +215,7 @@ public class UserGroupService {
                 .groupRating(scaledRating)
                 .groupMembers(usernames)
                 .verbaMatch(verbaMatch)
+                .groupId(groupId)
                 .build();
 
     }

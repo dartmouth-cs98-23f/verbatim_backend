@@ -12,5 +12,6 @@ public class GroupStats {
     double groupRating;
     List<User> verbaMatch;
     List<String> groupMembers;
+    int groupId;
 
 }
