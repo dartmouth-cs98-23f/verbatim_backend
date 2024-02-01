@@ -40,4 +40,13 @@ public interface UserGroupJunctionRepository extends JpaRepository<UserGroupJunc
             "HAVING COUNT(*) = 2 )",
             nativeQuery = true)
     List<UserGroupJunction> findMultiGroupsByUserId(Integer userId);
+
+    @Query(value = "SELECT * FROM user_group_junction " +
+            "WHERE user_id = ?1 " +
+            "AND group_id NOT IN (" +
+            "SELECT group_id FROM user_group_junction " +
+            "GROUP BY group_id " +
+            "HAVING COUNT(*) > 2 )",
+            nativeQuery = true)
+    List<UserGroupJunction> findFriendGroupsByUserId(Integer userId);
 }
