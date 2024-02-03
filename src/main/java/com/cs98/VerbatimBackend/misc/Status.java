@@ -23,4 +23,6 @@ public class Status {
 
     public static final int ACTIVE_FRIENDSHIP_NOT_FOUND = 473;
 
+    public static final int FETCH_USER_STATS_FAILED = 474;
+
 }

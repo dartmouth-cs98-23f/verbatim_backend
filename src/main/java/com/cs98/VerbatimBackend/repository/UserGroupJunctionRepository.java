@@ -31,4 +31,22 @@ public interface UserGroupJunctionRepository extends JpaRepository<UserGroupJunc
             "AND t2.user_id NOT IN (?1, ?2))",
             nativeQuery = true)
     int getGroupIdForFriendGroup(int user1Id, int user2Id);
+
+    @Query(value = "SELECT * FROM user_group_junction " +
+            "WHERE user_id = ?1 " +
+            "AND group_id NOT IN (" +
+            "SELECT group_id FROM user_group_junction " +
+            "GROUP BY group_id " +
+            "HAVING COUNT(*) = 2 )",
+            nativeQuery = true)
+    List<UserGroupJunction> findMultiGroupsByUserId(Integer userId);
+
+    @Query(value = "SELECT * FROM user_group_junction " +
+            "WHERE user_id = ?1 " +
+            "AND group_id NOT IN (" +
+            "SELECT group_id FROM user_group_junction " +
+            "GROUP BY group_id " +
+            "HAVING COUNT(*) > 2 )",
+            nativeQuery = true)
+    List<UserGroupJunction> findFriendGroupsByUserId(Integer userId);
 }

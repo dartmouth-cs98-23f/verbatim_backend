@@ -6,18 +6,13 @@ import com.cs98.VerbatimBackend.repository.*;
 import com.cs98.VerbatimBackend.request.CustomChallengeRequest;
 import com.cs98.VerbatimBackend.request.StandardChallengeRequest;
 import com.cs98.VerbatimBackend.request.SubmitGroupChallengeAnswerRequest;
-import com.cs98.VerbatimBackend.response.CreateCustomChallengeResponse;
-import com.cs98.VerbatimBackend.response.CreateStandardChallengeResponse;
-import com.cs98.VerbatimBackend.response.GlobalChallengeUserSpecificResponse;
-import com.cs98.VerbatimBackend.response.GroupChallengeUserSpecificResponse;
+import com.cs98.VerbatimBackend.response.*;
 import com.cs98.VerbatimBackend.service.GroupChallengeService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -42,6 +37,12 @@ public class GroupChallengeController {
 
     @Autowired
     private UserGroupJunctionRepository userGroupJunctionRepository;
+
+    @Autowired
+    private StandardChallengeUserResponseRepository standardChallengeUserResponseRepository;
+
+    @Autowired
+    private CustomChallengeUserResponseRepository customChallengeUserResponseRepository;
 
     @PostMapping("api/v1/createStandardChallenge")
     public ResponseEntity<CreateStandardChallengeResponse> createStandardChallenge(@RequestBody StandardChallengeRequest request) {
@@ -105,9 +106,11 @@ public class GroupChallengeController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("api/v1/getChallengeQs")
-    public ResponseEntity<List<Object>> getChallengeQs(@RequestBody int challengeId) {
+    @GetMapping("api/v1/{challengeId}/{username}/getChallengeQs")
+    public ResponseEntity<GetGroupChallengeQuestionsResponse> getChallengeQs(@PathVariable int challengeId,
+                                                                             @PathVariable String username) {
         GroupChallenge groupChallenge;
+        User user;
 
         // check that the challenge exists
         if (ObjectUtils.isEmpty(groupChallengeRepository.findById(challengeId))) {
@@ -116,14 +119,35 @@ public class GroupChallengeController {
             groupChallenge = groupChallengeRepository.findById(challengeId);
         }
 
+        // check that the user exists
+        if (ObjectUtils.isEmpty(userRepository.findByUsername(username))) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        } else {
+            user = userRepository.findByUsername(username);
+        }
+
         // create an object list to hold the response
-        List<Object> response = new ArrayList<>();
+        List<Object> questions = new ArrayList<>();
+        boolean hasCompleted = false;
 
         if (groupChallenge.getIsCustom()) {
-            response.add(groupChallengeService.getCustomChallengeQuestions(groupChallenge));
+            if (customChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), challengeId)) {
+                hasCompleted = true;
+            }
+            questions.add(groupChallengeService.getCustomChallengeQuestions(groupChallenge));
         } else {
-            response.add(groupChallengeService.getStandardChallengeQuestions(groupChallenge));
+            if (standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), challengeId)) {
+                hasCompleted = true;
+            }
+            questions.add(groupChallengeService.getStandardChallengeQuestions(groupChallenge));
         }
+
+        // build the response
+        GetGroupChallengeQuestionsResponse response = GetGroupChallengeQuestionsResponse
+                .builder()
+                .questions(questions)
+                .userHasCompleted(hasCompleted)
+                .build();
 
         return ResponseEntity.ok(response);
     }
