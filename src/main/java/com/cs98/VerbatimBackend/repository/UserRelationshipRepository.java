@@ -21,4 +21,13 @@ public interface UserRelationshipRepository extends JpaRepository<UserRelationsh
     @Query(value = "SELECT * FROM user_relationship where (requesting_user_id = ?1 OR requested_user_id = ?1) AND active = TRUE",
     nativeQuery = true)
     List<UserRelationship> findActiveFriendsByUserId(Integer userId);
+
+    @Query(value = "SELECT CASE WHEN EXISTS " +
+            "(SELECT * FROM user_relationship " +
+            "WHERE (requesting_user_id = ?1 OR requested_user_id = ?1) " +
+            "AND (requesting_user_id = ?2 OR requested_user_id = ?2) " +
+            "AND active = TRUE) " +
+            "THEN 'TRUE' ELSE 'FALSE' END",
+            nativeQuery = true)
+    Boolean friendshipExists(Integer user1_id, Integer user2_id);
 }

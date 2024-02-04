@@ -10,4 +10,5 @@ import java.util.List;
 @Builder
 public class GetActiveChallengesResponse {
     List<GroupChallenge> activeChallenges;
+    int groupId;
 }
