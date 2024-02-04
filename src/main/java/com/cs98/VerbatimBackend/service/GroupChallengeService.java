@@ -252,7 +252,7 @@ public class GroupChallengeService {
         return loadGroupChallengeStatsForUser(user, challenge);
     }
 
-    private GroupChallengeUserSpecificResponse loadGroupChallengeStatsForUser(User user, GroupChallenge challenge) {
+     public GroupChallengeUserSpecificResponse loadGroupChallengeStatsForUser(User user, GroupChallenge challenge) {
         GroupChallengeUserSpecificResponse response;
 
         // build response for custom challenge
@@ -360,6 +360,7 @@ public class GroupChallengeService {
                     .groupChallenge(challenge)
                     .groupAnswers(groupAnswers)
                     .totalResponses(totalResponses)
+                    .userHasCompleted(true)
                     .build();
         }
 
