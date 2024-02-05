@@ -262,6 +262,9 @@ public class GroupChallengeService {
             List<CustomChallengeResponse> challengeResponses = customChallengeUserResponseRepository
                     .findAllByGroupChallenge(challenge);
 
+            // convert to map for verbamatch
+            Map<String, List<String>> userResponses = new HashMap<>();
+
             // create group answers
             List<GroupAnswers> groupAnswers = new ArrayList<>();
             int totalResponses = 0;
@@ -275,6 +278,18 @@ public class GroupChallengeService {
 
                     // if the response question matches the current question
                     if (customChallengeResponse.getQuestion().getId().equals(question.getId())) {
+                        String username = customChallengeResponse.getUser().getUsername();
+                        if (!userResponses.containsKey(username)) {
+                            // if user not in map, add them
+                            List<String> responses = new ArrayList<>();
+                            responses.add(customChallengeResponse.getResponse());
+                            userResponses.put(username, responses);
+                        } else {
+                            // add the response
+                            List<String> responses = userResponses.get(username);
+                            responses.add(customChallengeResponse.getResponse());
+                            userResponses.put(username, responses);
+                        }
                         // add the response to the response map
                         responseQ.put(customChallengeResponse.getUser().getUsername(),
                                 customChallengeResponse.getResponse());
@@ -290,11 +305,19 @@ public class GroupChallengeService {
                         .build());
             }
 
+            // get verbamatch
+            System.out.println(userResponses);
+            VerbamatchResponse verbamatch = findVerbamatch(userResponses);
+            List<String> verbamatchUsers = verbamatch.getUsers();
+            double verbamatchScore = verbamatch.getScore();
+
             response = GroupChallengeUserSpecificResponse.builder()
                     .groupChallenge(challenge)
                     .groupAnswers(groupAnswers)
                     .totalResponses(totalResponses)
                     .userHasCompleted(true)
+                    .verbaMatch(verbamatchUsers)
+                    .verbaMatchSimilarity(verbamatchScore)
                     .build();
 
         } else { // build response for standard challenge
@@ -452,6 +475,21 @@ public class GroupChallengeService {
             union++;
         }
         System.out.println("intersection: " + intersection + " union: " + union + " similarity: " + (double) intersection / union);
-        return (double) intersection / union * 100;
+
+        // calculate raw similarity
+        double rawSimilarity = (double) intersection / union;
+
+        // calculate random noise value
+        double noise;
+        if (rawSimilarity > .975)
+            noise = 0;
+        else
+            noise = (Math.random() * .05) - .025;
+
+        // add the noise and normalize to 100 scale
+        double finalSimilarity = (rawSimilarity + noise) * 100;
+
+        // calculate final rounded similarity
+        return Math.round(finalSimilarity * 100.0) / 100.0;
     }
 }
