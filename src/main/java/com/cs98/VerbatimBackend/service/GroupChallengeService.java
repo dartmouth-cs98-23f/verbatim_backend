@@ -3,10 +3,7 @@ package com.cs98.VerbatimBackend.service;
 import com.cs98.VerbatimBackend.model.*;
 import com.cs98.VerbatimBackend.repository.*;
 import com.cs98.VerbatimBackend.request.SubmitGroupChallengeAnswerRequest;
-import com.cs98.VerbatimBackend.response.CreateCustomChallengeResponse;
-import com.cs98.VerbatimBackend.response.CreateStandardChallengeResponse;
-import com.cs98.VerbatimBackend.response.GroupAnswers;
-import com.cs98.VerbatimBackend.response.GroupChallengeUserSpecificResponse;
+import com.cs98.VerbatimBackend.response.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -314,6 +311,9 @@ public class GroupChallengeService {
             List<StandardChallengeResponse> challengeResponses = standardChallengeUserResponseRepository
                     .findAllByChallenge(standardChallenge);
 
+            // convert to map for verbamatch
+            Map<String, List<String>> userResponses = new HashMap<>();
+
             // create the maps to hold answers
             Map<String, String> responseQ1 = new HashMap<>();
             Map<String, String> responseQ2 = new HashMap<>();
@@ -323,13 +323,26 @@ public class GroupChallengeService {
 
             // add responses to the maps
             for (StandardChallengeResponse challengeResponse: challengeResponses) {
+                List<String> responses = new ArrayList<>();
                 String username = challengeResponse.getUser().getUsername();
                 responseQ1.put(username, challengeResponse.getResponseQ1());
                 responseQ2.put(username, challengeResponse.getResponseQ2());
                 responseQ3.put(username, challengeResponse.getResponseQ3());
                 responseQ4.put(username, challengeResponse.getResponseQ4());
                 responseQ5.put(username, challengeResponse.getResponseQ5());
+                responses.add(challengeResponse.getResponseQ1());
+                responses.add(challengeResponse.getResponseQ2());
+                responses.add(challengeResponse.getResponseQ3());
+                responses.add(challengeResponse.getResponseQ4());
+                responses.add(challengeResponse.getResponseQ5());
+                userResponses.put(username, responses);
             }
+
+            // get verbamatch
+            VerbamatchResponse verbamatch = findVerbamatch(userResponses);
+            List<String> verbamatchUsers = verbamatch.getUsers();
+            double verbamatchScore = verbamatch.getScore();
+
 
             // create Group Answers
             List<GroupAnswers> groupAnswers = new ArrayList<>();
@@ -361,6 +374,8 @@ public class GroupChallengeService {
                     .groupAnswers(groupAnswers)
                     .totalResponses(totalResponses)
                     .userHasCompleted(true)
+                    .verbaMatch(verbamatchUsers)
+                    .verbaMatchSimilarity(verbamatchScore)
                     .build();
         }
 
@@ -369,5 +384,24 @@ public class GroupChallengeService {
         }
 
         return response;
+    }
+
+    public static VerbamatchResponse findVerbamatch(Map<String, List<String>> userResponses) {
+
+    }
+
+    public static double jaccardSimilarity(List<String> responses1, List<String> responses2) {
+        // Calculate Jaccard similarity between two sets of responses
+        int intersection = 0;
+        int union = 0;
+
+        for (int i = 0; i < responses1.size(); i++) {
+            if (responses1.get(i).equals(responses2.get(i))) {
+                intersection++;
+            }
+            union++;
+        }
+
+        return (double) intersection / union;
     }
 }
