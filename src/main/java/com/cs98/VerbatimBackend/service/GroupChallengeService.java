@@ -306,7 +306,6 @@ public class GroupChallengeService {
             }
 
             // get verbamatch
-            System.out.println(userResponses);
             VerbamatchResponse verbamatch = findVerbamatch(userResponses);
             List<String> verbamatchUsers = verbamatch.getUsers();
             double verbamatchScore = verbamatch.getScore();
@@ -408,10 +407,8 @@ public class GroupChallengeService {
 
     public static VerbamatchResponse findVerbamatch(Map<String, List<String>> userResponses) {
 
-        System.out.println("Number of responses: " + userResponses.size());
 
         if (userResponses.size() < 2) {
-            System.out.println("returning empty due to not enough responses");
             return VerbamatchResponse.builder()
                     .users(new ArrayList<>())
                     .score(0.0)
@@ -421,16 +418,12 @@ public class GroupChallengeService {
         Map<List<String>, Double> similarityScoresList = new HashMap<>();
         List<String> usernames = new ArrayList<>();
         List<List<String>> responses = new ArrayList<>();
-        System.out.println("created lists and maps");
 
         // put responses into lists that are indexable
         for (Map.Entry<String, List<String>> entry : userResponses.entrySet()) {
             usernames.add(entry.getKey());
             responses.add(entry.getValue());
         }
-        System.out.println("put responses into lists");
-        System.out.println(usernames);
-        System.out.println(responses);
 
         // iterate through responses
         for (int i = 0; i < usernames.size(); i++) {
@@ -439,21 +432,16 @@ public class GroupChallengeService {
                     List<String> users = new ArrayList<>();
                     users.add(usernames.get(i));
                     users.add(usernames.get(j));
-                    System.out.println("Users: " + users);
 
                     // calculate the similarity for the users' responses
                     similarityScoresList.put(users, jaccardSimilarity(responses.get(i), responses.get(j)));
-                    System.out.println("added similarity to map");
                 }
             }
         }
-        System.out.println(similarityScoresList);
 
         // get the maximum similarity
         List<String> maxUsers = Collections.max(similarityScoresList.entrySet(), Map.Entry.comparingByValue()).getKey();
         Double maxScore = similarityScoresList.get(maxUsers);
-        System.out.println("Max Users: " + maxUsers);
-        System.out.println("Max score: " + maxScore);
 
         VerbamatchResponse response = VerbamatchResponse.builder()
                 .users(maxUsers)
@@ -474,7 +462,6 @@ public class GroupChallengeService {
             }
             union++;
         }
-        System.out.println("intersection: " + intersection + " union: " + union + " similarity: " + (double) intersection / union);
 
         // calculate raw similarity
         double rawSimilarity = (double) intersection / union;
