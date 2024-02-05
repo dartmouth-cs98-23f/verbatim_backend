@@ -143,7 +143,6 @@ public class GroupChallengeController {
 
         // create an object list to hold the response
         List<Object> questions = new ArrayList<>();
-        boolean hasCompleted = false;
 
         // if the challenge is custom
         if (groupChallenge.getIsCustom()) {

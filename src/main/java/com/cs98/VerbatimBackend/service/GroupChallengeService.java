@@ -10,10 +10,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class GroupChallengeService {
@@ -297,6 +294,7 @@ public class GroupChallengeService {
                     .groupChallenge(challenge)
                     .groupAnswers(groupAnswers)
                     .totalResponses(totalResponses)
+                    .userHasCompleted(true)
                     .build();
 
         } else { // build response for standard challenge
@@ -343,7 +341,6 @@ public class GroupChallengeService {
             List<String> verbamatchUsers = verbamatch.getUsers();
             double verbamatchScore = verbamatch.getScore();
 
-
             // create Group Answers
             List<GroupAnswers> groupAnswers = new ArrayList<>();
             groupAnswers.add(GroupAnswers.builder()
@@ -388,6 +385,59 @@ public class GroupChallengeService {
 
     public static VerbamatchResponse findVerbamatch(Map<String, List<String>> userResponses) {
 
+        System.out.println("Number of responses: " + userResponses.size());
+
+        if (userResponses.size() < 2) {
+            System.out.println("returning empty due to not enough responses");
+            return VerbamatchResponse.builder()
+                    .users(new ArrayList<>())
+                    .score(0.0)
+                    .build();
+        }
+        // List to store the similarity score for each user pair in a challenge
+        Map<List<String>, Double> similarityScoresList = new HashMap<>();
+        List<String> usernames = new ArrayList<>();
+        List<List<String>> responses = new ArrayList<>();
+        System.out.println("created lists and maps");
+
+        // put responses into lists that are indexable
+        for (Map.Entry<String, List<String>> entry : userResponses.entrySet()) {
+            usernames.add(entry.getKey());
+            responses.add(entry.getValue());
+        }
+        System.out.println("put responses into lists");
+        System.out.println(usernames);
+        System.out.println(responses);
+
+        // iterate through responses
+        for (int i = 0; i < usernames.size(); i++) {
+            for (int j = 1; j < usernames.size(); j++) {
+                if (i != j) { // make sure we don't calculate similarity between the same user
+                    List<String> users = new ArrayList<>();
+                    users.add(usernames.get(i));
+                    users.add(usernames.get(j));
+                    System.out.println("Users: " + users);
+
+                    // calculate the similarity for the users' responses
+                    similarityScoresList.put(users, jaccardSimilarity(responses.get(i), responses.get(j)));
+                    System.out.println("added similarity to map");
+                }
+            }
+        }
+        System.out.println(similarityScoresList);
+
+        // get the maximum similarity
+        List<String> maxUsers = Collections.max(similarityScoresList.entrySet(), Map.Entry.comparingByValue()).getKey();
+        Double maxScore = similarityScoresList.get(maxUsers);
+        System.out.println("Max Users: " + maxUsers);
+        System.out.println("Max score: " + maxScore);
+
+        VerbamatchResponse response = VerbamatchResponse.builder()
+                .users(maxUsers)
+                .score(maxScore)
+                .build();
+
+        return response;
     }
 
     public static double jaccardSimilarity(List<String> responses1, List<String> responses2) {
@@ -401,7 +451,7 @@ public class GroupChallengeService {
             }
             union++;
         }
-
-        return (double) intersection / union;
+        System.out.println("intersection: " + intersection + " union: " + union + " similarity: " + (double) intersection / union);
+        return (double) intersection / union * 100;
     }
 }
