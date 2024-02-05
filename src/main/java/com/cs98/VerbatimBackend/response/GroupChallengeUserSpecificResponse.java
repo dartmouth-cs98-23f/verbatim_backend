@@ -23,7 +23,7 @@ public class GroupChallengeUserSpecificResponse {
 
     private int totalResponses;
 
-    private List<User> verbaMatch;
+    private List<String> verbaMatch;
 
     private double verbaMatchSimilarity;
 
