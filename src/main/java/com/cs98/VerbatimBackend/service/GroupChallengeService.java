@@ -175,12 +175,13 @@ public class GroupChallengeService {
         GroupChallengeUserSpecificResponse response;
 
         if (challenge.getIsCustom()) {
-            if (customChallengeUserResponseRepository.existsByUserIdAndChallengeId(respondingUser.getId(), challenge.getId())) {
+            if (customChallengeUserResponseRepository.existsByUserIdAndGroupChallengeId(respondingUser.getId(), challenge.getId())) {
                 throw new RuntimeException("User has already completed this group challenge");
             }
             response = submitCustomResponse(request);
         } else {
-            if (standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(respondingUser.getId(), challenge.getId())) {
+            StandardChallenge standardChallenge = standardChallengeRepository.findByChallenge(challenge);
+            if (standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(respondingUser.getId(), standardChallenge.getId())) {
                 throw new RuntimeException("User has already completed this group challenge");
             }
             response = submitStandardResponse(request);
@@ -244,6 +245,35 @@ public class GroupChallengeService {
         }
 
         return loadGroupChallengeStatsForUser(user, challenge);
+    }
+
+    public GroupChallengeUserSpecificResponse loadGroupChallengeForUser(User user, GroupChallenge challenge) {
+
+        // if user has not completed the group challenge
+        GroupChallengeUserSpecificResponse response;
+
+        // create an object list to hold the response
+        List<Object> questions = new ArrayList<>();
+
+        // if the challenge is custom
+        if (challenge.getIsCustom()) {
+            questions.add(getCustomChallengeQuestions(challenge));
+        }
+
+        // if the challenge is standard
+        else {
+            questions.add(getStandardChallengeQuestions(challenge));
+        }
+
+        // build the response
+        response = GroupChallengeUserSpecificResponse
+                .builder()
+                .groupChallenge(challenge)
+                .questions(questions)
+                .userHasCompleted(false)
+                .build();
+
+        return response;
     }
 
      public GroupChallengeUserSpecificResponse loadGroupChallengeStatsForUser(User user, GroupChallenge challenge) {
