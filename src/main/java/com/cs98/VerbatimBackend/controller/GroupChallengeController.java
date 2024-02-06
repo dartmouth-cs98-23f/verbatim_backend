@@ -187,4 +187,28 @@ public class GroupChallengeController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("api/v1/{challengeId}/{username}/userHasCompleted")
+    public ResponseEntity<Boolean> userHasCompletedChallenge(@PathVariable int challengeId,
+                                                             @PathVariable String username) {
+        User user = userRepository.findByUsername(username);
+        GroupChallenge challenge = groupChallengeRepository.findById(challengeId);
+
+        if (ObjectUtils.isEmpty(user)) { // make sure user exists
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
+        if (ObjectUtils.isEmpty(challenge)) { // make sure challenge exists
+            return ResponseEntity.status(Status.GROUP_CHALLENGE_NOT_FOUND).build();
+        }
+
+
+        boolean hasCompleted;
+        hasCompleted = (customChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), challengeId)) ||
+                standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), challengeId);
+
+        return ResponseEntity.ok(hasCompleted);
+
+    }
+
 }
