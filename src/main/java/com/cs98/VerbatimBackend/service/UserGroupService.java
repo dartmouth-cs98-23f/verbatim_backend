@@ -47,6 +47,22 @@ public class UserGroupService {
     public UserGroupCreationResponse createGroup(UserGroupCreationRequest request) {
         User createdByUser = userRepository.findByUsername(request.getCreatedByUsername());
 
+        // make sure group doesn't already exist
+        int memberCount = request.getUsernamesToAdd().size() + 1;
+        List<Integer> userIds = new ArrayList<>();
+        userIds.add(createdByUser.getId());
+
+        if (!ObjectUtils.isEmpty(request.getUsernamesToAdd())) {
+            for (String username : request.getUsernamesToAdd()) {
+                User userToAdd = userRepository.findByUsername(username);
+                userIds.add(userToAdd.getId());
+            }
+        }
+
+        if (userGroupJunctionRepository.exactGroupExists(userIds, memberCount)) {
+            throw new RuntimeException("Group already exists with these members");
+        }
+
         UserGroup group = UserGroup.builder()
                 .name(request.getGroupName())
                 .build();
@@ -65,7 +81,6 @@ public class UserGroupService {
         if (!ObjectUtils.isEmpty(request.getUsernamesToAdd())) {
             for (String username : request.getUsernamesToAdd()) {
                 User userToAdd = userRepository.findByUsername(username);
-
                 if (ObjectUtils.isEmpty(userToAdd)) {
                     return null;
                 }
