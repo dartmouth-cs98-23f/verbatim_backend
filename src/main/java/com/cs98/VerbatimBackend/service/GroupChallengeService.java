@@ -496,15 +496,8 @@ public class GroupChallengeService {
         // calculate raw similarity
         double rawSimilarity = (double) intersection / union;
 
-        // calculate random noise value
-        double noise;
-        if (rawSimilarity > .975)
-            noise = 0;
-        else
-            noise = (Math.random() * .05) - .025;
-
-        // add the noise and normalize to 100 scale
-        double finalSimilarity = (rawSimilarity + noise) * 100;
+        // normalize to 100 scale
+        double finalSimilarity = rawSimilarity  * 100;
 
         // calculate final rounded similarity
         return Math.round(finalSimilarity * 100.0) / 100.0;
