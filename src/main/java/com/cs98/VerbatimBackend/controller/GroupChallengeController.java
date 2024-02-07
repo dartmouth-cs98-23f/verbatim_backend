@@ -44,6 +44,8 @@ public class GroupChallengeController {
     @Autowired
     private CustomChallengeUserResponseRepository customChallengeUserResponseRepository;
 
+    @Autowired StandardChallengeRepository standardChallengeRepository;
+
     @PostMapping("api/v1/createStandardChallenge")
     public ResponseEntity<CreateStandardChallengeResponse> createStandardChallenge(@RequestBody StandardChallengeRequest request) {
         User createdByUser = userRepository.findByUsername(request.getCreatedByUsername());
@@ -127,40 +129,40 @@ public class GroupChallengeController {
             user = userRepository.findByUsername(username);
         }
 
-        // if user has completed the group challenge
-        if ((customChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), challengeId)) ||
-                standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), challengeId)) {
-            response = groupChallengeService.loadGroupChallengeStatsForUser(user, groupChallenge);
-
-            if (ObjectUtils.isEmpty(response)) {
-                throw new RuntimeException("failed to build response");
-            }
-
-            return ResponseEntity.ok(response);
-        }
-
-        // if user has not completed the group challenge
-
-        // create an object list to hold the response
-        List<Object> questions = new ArrayList<>();
-
-        // if the challenge is custom
+        boolean hasCompleted;
         if (groupChallenge.getIsCustom()) {
-            questions.add(groupChallengeService.getCustomChallengeQuestions(groupChallenge));
+            hasCompleted = customChallengeUserResponseRepository.existsByUserIdAndGroupChallengeId(user.getId(), challengeId);
+            if (hasCompleted) {
+                response = groupChallengeService.loadGroupChallengeStatsForUser(user, groupChallenge);
+            } else {
+                response = groupChallengeService.loadGroupChallengeForUser(user, groupChallenge);
+            }
+        } else {
+            StandardChallenge standardChallenge = standardChallengeRepository.findByChallenge(groupChallenge);
+            hasCompleted = standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), standardChallenge.getId());
+            if (hasCompleted) {
+                response = groupChallengeService.loadGroupChallengeStatsForUser(user, groupChallenge);
+            } else {
+                response = groupChallengeService.loadGroupChallengeForUser(user, groupChallenge);
+            }
         }
 
-        // if the challenge is standard
-        else {
-            questions.add(groupChallengeService.getStandardChallengeQuestions(groupChallenge));
+        if (ObjectUtils.isEmpty(response)) {
+            throw new RuntimeException("failed to build response");
         }
 
-        // build the response
-        response = GroupChallengeUserSpecificResponse
-                .builder()
-                .groupChallenge(groupChallenge)
-                .questions(questions)
-                .userHasCompleted(false)
-                .build();
+//        // if user has completed the group challenge
+//        if ((customChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), challengeId)) ||
+//                // THIS SHOULD BE STANDARD CHALLENGE ID!!!!
+//                standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), STANDARDchallengeId)) {
+//            response = groupChallengeService.loadGroupChallengeStatsForUser(user, groupChallenge);
+//
+//            if (ObjectUtils.isEmpty(response)) {
+//                throw new RuntimeException("failed to build response");
+//            }
+//
+//            return ResponseEntity.ok(response);
+//        }
 
         return ResponseEntity.ok(response);
     }
@@ -187,4 +189,31 @@ public class GroupChallengeController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("api/v1/{challengeId}/{username}/userHasCompleted")
+    public ResponseEntity<Boolean> userHasCompletedChallenge(@PathVariable int challengeId,
+                                                             @PathVariable String username) {
+        User user = userRepository.findByUsername(username);
+        GroupChallenge challenge = groupChallengeRepository.findById(challengeId);
+
+        if (ObjectUtils.isEmpty(user)) { // make sure user exists
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
+        if (ObjectUtils.isEmpty(challenge)) { // make sure challenge exists
+            return ResponseEntity.status(Status.GROUP_CHALLENGE_NOT_FOUND).build();
+        }
+
+        boolean hasCompleted;
+        if (challenge.getIsCustom()) {
+            hasCompleted = customChallengeUserResponseRepository.existsByUserIdAndGroupChallengeId(user.getId(), challengeId);
+        } else {
+            StandardChallenge standardChallenge = standardChallengeRepository.findByChallenge(challenge);
+            hasCompleted = standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), standardChallenge.getId());
+        }
+
+        return ResponseEntity.ok(hasCompleted);
+
+    }
+
 }

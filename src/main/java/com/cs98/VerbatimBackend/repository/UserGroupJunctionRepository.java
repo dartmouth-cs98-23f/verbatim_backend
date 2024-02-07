@@ -49,4 +49,15 @@ public interface UserGroupJunctionRepository extends JpaRepository<UserGroupJunc
             "HAVING COUNT(*) > 2 )",
             nativeQuery = true)
     List<UserGroupJunction> findFriendGroupsByUserId(Integer userId);
+
+    @Query(value = "SELECT CASE WHEN EXISTS ( " +
+            "SELECT group_id " +
+            "FROM user_group_junction " +
+            "WHERE user_id IN (?1) " +
+            "GROUP BY group_id " +
+            "HAVING COUNT(DISTINCT user_id) = ?2) " +
+            "THEN TRUE ELSE FALSE " +
+            "END AS group_exists",
+            nativeQuery = true)
+    Boolean exactGroupExists(List<Integer> userIds, Integer memberCount);
 }
