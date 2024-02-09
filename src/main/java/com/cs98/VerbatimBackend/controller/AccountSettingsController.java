@@ -6,17 +6,18 @@ import com.cs98.VerbatimBackend.repository.UserRelationshipRepository;
 import com.cs98.VerbatimBackend.repository.UserRepository;
 import com.cs98.VerbatimBackend.request.RegisterRequest;
 import com.cs98.VerbatimBackend.request.ResetPasswordRequest;
+import com.cs98.VerbatimBackend.response.GetUserStatsResponse;
+import com.cs98.VerbatimBackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.cs98.VerbatimBackend.request.AccountSettingsRequest;
 import com.cs98.VerbatimBackend.misc.Status;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -27,6 +28,9 @@ public class AccountSettingsController {
 
     @Autowired
     private UserRelationshipRepository userRelationshipRepository;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping(path = "api/v1/accountSettings")
     public ResponseEntity<User> accountSettings(@RequestBody AccountSettingsRequest request) {
@@ -125,8 +129,8 @@ public class AccountSettingsController {
         }
     }
 
-    @PostMapping (path = "api/v1/getUserStats")
-    public ResponseEntity<List<Integer>> getUserStats(@RequestBody String username) {
+    @GetMapping(path = "api/v1/{username}/getUserStats")
+    public ResponseEntity<GetUserStatsResponse> getUserStats(@PathVariable String username) {
         User user;
         // if user does not exist, return bad request
         if (!userRepository.existsByUsername(username)) {
@@ -137,24 +141,13 @@ public class AccountSettingsController {
             user = userRepository.findByUsername(username);
         }
 
-        // get the user's stats
-        int streak = user.getStreak();
-        int customChal = user.getNumCustomChallengesCompleted();
-        int globalChal = user.getNumGlobalChallengesCompleted();
+        GetUserStatsResponse response = userService.getUserStats(user);
 
-        // get the user's friends
-        List<UserRelationship> friends = userRelationshipRepository.findActiveFriendsByUserId(user.getId());
-        int numFriends = friends.size();
+        if (ObjectUtils.isEmpty(response)) {
+            return ResponseEntity.status(Status.FETCH_USER_STATS_FAILED).build();
+        }
 
-        // create a list to hold the stats and add the stats
-        List<Integer> stats = new ArrayList<>();
-
-        stats.add(streak);
-        stats.add(customChal);
-        stats.add(globalChal);
-        stats.add(numFriends);
-
-        return ResponseEntity.ok(stats);
+        return ResponseEntity.ok(response);
 
     }
 }

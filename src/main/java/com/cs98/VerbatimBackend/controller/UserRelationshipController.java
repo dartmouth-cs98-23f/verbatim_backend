@@ -3,18 +3,19 @@ package com.cs98.VerbatimBackend.controller;
 import com.cs98.VerbatimBackend.misc.Status;
 import com.cs98.VerbatimBackend.model.User;
 import com.cs98.VerbatimBackend.model.UserRelationship;
+import com.cs98.VerbatimBackend.repository.UserGroupJunctionRepository;
 import com.cs98.VerbatimBackend.repository.UserRelationshipRepository;
 import com.cs98.VerbatimBackend.repository.UserRepository;
 import com.cs98.VerbatimBackend.request.FriendAcceptOrDeclineRequest;
 import com.cs98.VerbatimBackend.request.FriendRequest;
-import com.cs98.VerbatimBackend.response.InboundFriendRequestResponse;
+import com.cs98.VerbatimBackend.request.UserGroupCreationRequest;
+import com.cs98.VerbatimBackend.response.*;
+import com.cs98.VerbatimBackend.response.UserGroupCreationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,12 @@ public class UserRelationshipController {
 
     @Autowired
     private UserRelationshipRepository userRelationshipRepository;
+
+    @Autowired
+    private UserGroupController userGroupController;
+
+    @Autowired
+    private UserGroupJunctionRepository userGroupJunctionRepository;
 
 
     @PostMapping("api/v1/addFriend")
@@ -117,6 +124,23 @@ public class UserRelationshipController {
         if (request.getAccept()) {
             relationship.setActive(true);
             userRelationshipRepository.save(relationship);
+
+            // create a "group" with these two users
+
+            // build the request
+            UserGroupCreationRequest userGroupCreationRequest = new UserGroupCreationRequest();
+            userGroupCreationRequest.setCreatedByUsername(requestingUser.getUsername());
+            userGroupCreationRequest.setGroupName(requestingUser.getUsername() + "_" + requestedUser.getUsername());
+            List<String> usernames = new ArrayList<>();
+            usernames.add(requestedUser.getUsername());
+            userGroupCreationRequest.setUsernamesToAdd(usernames);
+
+            // create the group
+            ResponseEntity<UserGroupCreationResponse> response = userGroupController.createGroup(userGroupCreationRequest);
+
+            if (ObjectUtils.isEmpty(response)) { // make sure the response is not empty
+                throw new RuntimeException("could not build response");
+            }
         }
         else {
             userRelationshipRepository.delete(relationship);
@@ -139,6 +163,53 @@ public class UserRelationshipController {
             }
         }
         return ResponseEntity.ok(friendsList);
+
+    }
+
+    @GetMapping(path = "api/v1/{user}/{friend}/challenges")
+    public ResponseEntity<GetActiveChallengesResponse> getActiveChallenges(@PathVariable String user,
+                                                                           @PathVariable String friend) {
+        // get user IDs
+        int userId = userRepository.findByUsername(user).getId();
+        int friendId = userRepository.findByUsername(friend).getId();
+
+        if (ObjectUtils.isEmpty(userId) || ObjectUtils.isEmpty(friendId) || userId == friendId) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
+        // make sure the two users are friends
+        if (!userRelationshipRepository.friendshipExists(userId, friendId)) {
+            return ResponseEntity.status(Status.ACTIVE_FRIENDSHIP_NOT_FOUND).build();
+        }
+
+        // get the group ID for the friendship
+        int groupId = userGroupJunctionRepository.getGroupIdForFriendGroup(userId, friendId);
+
+        // get the active group challenges
+        return userGroupController.getActiveChallenges(groupId);
+    }
+
+    @GetMapping(path = "api/v1/{user}/{friend}")
+    public ResponseEntity<GroupStats> getGroupStats(@PathVariable String user,
+                                                    @PathVariable String friend) {
+        // get user IDs
+        int userId = userRepository.findByUsername(user).getId();
+        int friendId = userRepository.findByUsername(friend).getId();
+
+        if (ObjectUtils.isEmpty(userId) || ObjectUtils.isEmpty(friendId) || userId == friendId) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+
+        // make sure the two users are friends
+        if (!userRelationshipRepository.friendshipExists(userId, friendId)) {
+            return ResponseEntity.status(Status.ACTIVE_FRIENDSHIP_NOT_FOUND).build();
+        }
+
+        // get the group ID for the friendship
+        int groupId = userGroupJunctionRepository.getGroupIdForFriendGroup(userId, friendId);
+
+        // get stats
+        return userGroupController.getGroupStats(groupId);
 
     }
 

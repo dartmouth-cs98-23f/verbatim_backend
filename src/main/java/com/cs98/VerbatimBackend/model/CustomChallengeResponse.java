@@ -18,6 +18,10 @@ public class CustomChallengeResponse {
     private Integer id;
 
     @ManyToOne
+    @JoinColumn(name = "group_challenge_id")
+    private  GroupChallenge groupChallenge;
+
+    @ManyToOne
     @JoinColumn(name = "custom_challenge_id")
     private CustomChallenge challenge;
 
