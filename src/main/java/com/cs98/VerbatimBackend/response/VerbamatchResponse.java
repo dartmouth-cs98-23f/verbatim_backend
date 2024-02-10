@@ -7,8 +7,8 @@ import java.util.List;
 
 @Data
 @Builder
-public class GetGroupChallengeQuestionsResponse {
-    List<Object> questions;
+public class VerbamatchResponse {
+    private List<String> users;
 
-    Boolean userHasCompleted;
+    private Double score;
 }

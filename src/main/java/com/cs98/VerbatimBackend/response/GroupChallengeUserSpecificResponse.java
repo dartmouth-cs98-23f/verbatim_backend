@@ -15,11 +15,15 @@ public class GroupChallengeUserSpecificResponse {
     @JsonManagedReference
     private GroupChallenge groupChallenge;
 
+    List<Object> questions;
+
+    Boolean userHasCompleted;
+
     private List<GroupAnswers> groupAnswers;
 
     private int totalResponses;
 
-    private List<User> verbaMatch;
+    private List<String> verbaMatch;
 
     private double verbaMatchSimilarity;
 

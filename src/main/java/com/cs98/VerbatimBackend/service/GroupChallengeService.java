@@ -3,20 +3,14 @@ package com.cs98.VerbatimBackend.service;
 import com.cs98.VerbatimBackend.model.*;
 import com.cs98.VerbatimBackend.repository.*;
 import com.cs98.VerbatimBackend.request.SubmitGroupChallengeAnswerRequest;
-import com.cs98.VerbatimBackend.response.CreateCustomChallengeResponse;
-import com.cs98.VerbatimBackend.response.CreateStandardChallengeResponse;
-import com.cs98.VerbatimBackend.response.GroupAnswers;
-import com.cs98.VerbatimBackend.response.GroupChallengeUserSpecificResponse;
+import com.cs98.VerbatimBackend.response.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class GroupChallengeService {
@@ -181,12 +175,13 @@ public class GroupChallengeService {
         GroupChallengeUserSpecificResponse response;
 
         if (challenge.getIsCustom()) {
-            if (customChallengeUserResponseRepository.existsByUserIdAndChallengeId(respondingUser.getId(), challenge.getId())) {
+            if (customChallengeUserResponseRepository.existsByUserIdAndGroupChallengeId(respondingUser.getId(), challenge.getId())) {
                 throw new RuntimeException("User has already completed this group challenge");
             }
             response = submitCustomResponse(request);
         } else {
-            if (standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(respondingUser.getId(), challenge.getId())) {
+            StandardChallenge standardChallenge = standardChallengeRepository.findByChallenge(challenge);
+            if (standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(respondingUser.getId(), standardChallenge.getId())) {
                 throw new RuntimeException("User has already completed this group challenge");
             }
             response = submitStandardResponse(request);
@@ -252,7 +247,36 @@ public class GroupChallengeService {
         return loadGroupChallengeStatsForUser(user, challenge);
     }
 
-    private GroupChallengeUserSpecificResponse loadGroupChallengeStatsForUser(User user, GroupChallenge challenge) {
+    public GroupChallengeUserSpecificResponse loadGroupChallengeForUser(User user, GroupChallenge challenge) {
+
+        // if user has not completed the group challenge
+        GroupChallengeUserSpecificResponse response;
+
+        // create an object list to hold the response
+        List<Object> questions = new ArrayList<>();
+
+        // if the challenge is custom
+        if (challenge.getIsCustom()) {
+            questions.add(getCustomChallengeQuestions(challenge));
+        }
+
+        // if the challenge is standard
+        else {
+            questions.add(getStandardChallengeQuestions(challenge));
+        }
+
+        // build the response
+        response = GroupChallengeUserSpecificResponse
+                .builder()
+                .groupChallenge(challenge)
+                .questions(questions)
+                .userHasCompleted(false)
+                .build();
+
+        return response;
+    }
+
+     public GroupChallengeUserSpecificResponse loadGroupChallengeStatsForUser(User user, GroupChallenge challenge) {
         GroupChallengeUserSpecificResponse response;
 
         // build response for custom challenge
@@ -268,6 +292,9 @@ public class GroupChallengeService {
             List<CustomChallengeResponse> challengeResponses = customChallengeUserResponseRepository
                     .findAllByGroupChallenge(challenge);
 
+            // convert to map for verbamatch
+            Map<String, List<String>> userResponses = new HashMap<>();
+
             // create group answers
             List<GroupAnswers> groupAnswers = new ArrayList<>();
             int totalResponses = 0;
@@ -281,6 +308,18 @@ public class GroupChallengeService {
 
                     // if the response question matches the current question
                     if (customChallengeResponse.getQuestion().getId().equals(question.getId())) {
+                        String username = customChallengeResponse.getUser().getUsername();
+                        if (!userResponses.containsKey(username)) {
+                            // if user not in map, add them
+                            List<String> responses = new ArrayList<>();
+                            responses.add(customChallengeResponse.getResponse());
+                            userResponses.put(username, responses);
+                        } else {
+                            // add the response
+                            List<String> responses = userResponses.get(username);
+                            responses.add(customChallengeResponse.getResponse());
+                            userResponses.put(username, responses);
+                        }
                         // add the response to the response map
                         responseQ.put(customChallengeResponse.getUser().getUsername(),
                                 customChallengeResponse.getResponse());
@@ -296,10 +335,18 @@ public class GroupChallengeService {
                         .build());
             }
 
+            // get verbamatch
+            VerbamatchResponse verbamatch = findVerbamatch(userResponses);
+            List<String> verbamatchUsers = verbamatch.getUsers();
+            double verbamatchScore = verbamatch.getScore();
+
             response = GroupChallengeUserSpecificResponse.builder()
                     .groupChallenge(challenge)
                     .groupAnswers(groupAnswers)
                     .totalResponses(totalResponses)
+                    .userHasCompleted(true)
+                    .verbaMatch(verbamatchUsers)
+                    .verbaMatchSimilarity(verbamatchScore)
                     .build();
 
         } else { // build response for standard challenge
@@ -314,6 +361,9 @@ public class GroupChallengeService {
             List<StandardChallengeResponse> challengeResponses = standardChallengeUserResponseRepository
                     .findAllByChallenge(standardChallenge);
 
+            // convert to map for verbamatch
+            Map<String, List<String>> userResponses = new HashMap<>();
+
             // create the maps to hold answers
             Map<String, String> responseQ1 = new HashMap<>();
             Map<String, String> responseQ2 = new HashMap<>();
@@ -323,13 +373,25 @@ public class GroupChallengeService {
 
             // add responses to the maps
             for (StandardChallengeResponse challengeResponse: challengeResponses) {
+                List<String> responses = new ArrayList<>();
                 String username = challengeResponse.getUser().getUsername();
                 responseQ1.put(username, challengeResponse.getResponseQ1());
                 responseQ2.put(username, challengeResponse.getResponseQ2());
                 responseQ3.put(username, challengeResponse.getResponseQ3());
                 responseQ4.put(username, challengeResponse.getResponseQ4());
                 responseQ5.put(username, challengeResponse.getResponseQ5());
+                responses.add(challengeResponse.getResponseQ1());
+                responses.add(challengeResponse.getResponseQ2());
+                responses.add(challengeResponse.getResponseQ3());
+                responses.add(challengeResponse.getResponseQ4());
+                responses.add(challengeResponse.getResponseQ5());
+                userResponses.put(username, responses);
             }
+
+            // get verbamatch
+            VerbamatchResponse verbamatch = findVerbamatch(userResponses);
+            List<String> verbamatchUsers = verbamatch.getUsers();
+            double verbamatchScore = verbamatch.getScore();
 
             // create Group Answers
             List<GroupAnswers> groupAnswers = new ArrayList<>();
@@ -360,6 +422,9 @@ public class GroupChallengeService {
                     .groupChallenge(challenge)
                     .groupAnswers(groupAnswers)
                     .totalResponses(totalResponses)
+                    .userHasCompleted(true)
+                    .verbaMatch(verbamatchUsers)
+                    .verbaMatchSimilarity(verbamatchScore)
                     .build();
         }
 
@@ -368,5 +433,73 @@ public class GroupChallengeService {
         }
 
         return response;
+    }
+
+    public static VerbamatchResponse findVerbamatch(Map<String, List<String>> userResponses) {
+
+
+        if (userResponses.size() < 2) {
+            return VerbamatchResponse.builder()
+                    .users(new ArrayList<>())
+                    .score(0.0)
+                    .build();
+        }
+        // List to store the similarity score for each user pair in a challenge
+        Map<List<String>, Double> similarityScoresList = new HashMap<>();
+        List<String> usernames = new ArrayList<>();
+        List<List<String>> responses = new ArrayList<>();
+
+        // put responses into lists that are indexable
+        for (Map.Entry<String, List<String>> entry : userResponses.entrySet()) {
+            usernames.add(entry.getKey());
+            responses.add(entry.getValue());
+        }
+
+        // iterate through responses
+        for (int i = 0; i < usernames.size(); i++) {
+            for (int j = 1; j < usernames.size(); j++) {
+                if (i != j) { // make sure we don't calculate similarity between the same user
+                    List<String> users = new ArrayList<>();
+                    users.add(usernames.get(i));
+                    users.add(usernames.get(j));
+
+                    // calculate the similarity for the users' responses
+                    similarityScoresList.put(users, jaccardSimilarity(responses.get(i), responses.get(j)));
+                }
+            }
+        }
+
+        // get the maximum similarity
+        List<String> maxUsers = Collections.max(similarityScoresList.entrySet(), Map.Entry.comparingByValue()).getKey();
+        Double maxScore = similarityScoresList.get(maxUsers);
+
+        VerbamatchResponse response = VerbamatchResponse.builder()
+                .users(maxUsers)
+                .score(maxScore)
+                .build();
+
+        return response;
+    }
+
+    public static double jaccardSimilarity(List<String> responses1, List<String> responses2) {
+        // Calculate Jaccard similarity between two sets of responses
+        int intersection = 0;
+        int union = 0;
+
+        for (int i = 0; i < responses1.size(); i++) {
+            if (responses1.get(i).equals(responses2.get(i))) {
+                intersection++;
+            }
+            union++;
+        }
+
+        // calculate raw similarity
+        double rawSimilarity = (double) intersection / union;
+
+        // normalize to 100 scale
+        double finalSimilarity = rawSimilarity  * 100;
+
+        // calculate final rounded similarity
+        return Math.round(finalSimilarity * 100.0) / 100.0;
     }
 }
