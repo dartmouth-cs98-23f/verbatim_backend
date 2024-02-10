@@ -183,8 +183,8 @@ public class GlobalChallengeService {
             String responseQ1 = friendResponse.getResponseQ1();
             String responseQ2 = friendResponse.getResponseQ2();
             String responseQ3 = friendResponse.getResponseQ3();
-            String responseQ4 = friendResponse.getResponseQ3();
-            String responseQ5 = friendResponse.getResponseQ3();
+            String responseQ4 = friendResponse.getResponseQ4();
+            String responseQ5 = friendResponse.getResponseQ5();
 
             q1FriendResponses.put(friend, responseQ1);
             q2FriendResponses.put(friend, responseQ2);

@@ -104,9 +104,13 @@ public class GlobalChallengeController {
                 .q1(globalChallenge.getQ1().getContent())
                 .q2(globalChallenge.getQ2().getContent())
                 .q3(globalChallenge.getQ3().getContent())
+                .q4(globalChallenge.getQ4().getContent())
+                .q5(globalChallenge.getQ5().getContent())
                 .categoryQ1(globalChallenge.getQ1().getCategory().getTitle())
                 .categoryQ2(globalChallenge.getQ2().getCategory().getTitle())
                 .categoryQ3(globalChallenge.getQ3().getCategory().getTitle())
+                .categoryQ4(globalChallenge.getQ4().getCategory().getTitle())
+                .categoryQ5(globalChallenge.getQ5().getCategory().getTitle())
                 .build();
 
         return ResponseEntity.ok(globalChallengeQuestions);
@@ -168,6 +172,8 @@ public class GlobalChallengeController {
         submitAnswerRequest.setResponseQ1(request.getResponseQ1());
         submitAnswerRequest.setResponseQ2(request.getResponseQ2());
         submitAnswerRequest.setResponseQ3(request.getResponseQ3());
+        submitAnswerRequest.setResponseQ4(request.getResponseQ4());
+        submitAnswerRequest.setResponseQ5(request.getResponseQ5());
 
         GlobalChallengeUserSpecificResponse response = globalChallengeService.submitGlobalResponse(submitAnswerRequest);
 
@@ -176,13 +182,19 @@ public class GlobalChallengeController {
                 .responseQ1(response.getResponseQ1())
                 .responseQ2(response.getResponseQ2())
                 .responseQ3(response.getResponseQ3())
+                .responseQ4(response.getResponseQ4())
+                .responseQ5(response.getResponseQ5())
                 .numVerbatimQ1(response.getNumVerbatimQ1())
                 .numVerbatimQ2(response.getNumVerbatimQ2())
                 .numVerbatimQ3(response.getNumVerbatimQ3())
+                .numVerbatimQ4(response.getNumVerbatimQ4())
+                .numVerbatimQ5(response.getNumVerbatimQ5())
                 .numExactVerbatim(response.getNumExactVerbatim())
                 .statsQ1(response.getStatsQ1())
                 .statsQ2(response.getStatsQ2())
                 .statsQ3(response.getStatsQ3())
+                .statsQ4(response.getStatsQ4())
+                .statsQ5(response.getStatsQ5())
                 .verbatasticUsers(response.getVerbatasticUsers())
                 .globalChallengeId(response.getGlobalChallengeId())
                 .totalResponses(response.getTotalResponses())
@@ -190,9 +202,13 @@ public class GlobalChallengeController {
                 .q1(response.getQ1())
                 .q2(response.getQ2())
                 .q3(response.getQ3())
+                .q4(response.getQ4())
+                .q5(response.getQ5())
                 .categoryQ1(response.getCategoryQ1())
                 .categoryQ2(response.getCategoryQ2())
                 .categoryQ3(response.getCategoryQ3())
+                .categoryQ4(response.getCategoryQ4())
+                .categoryQ5(response.getCategoryQ5())
                 .user(userEntityToReturn)
                 .build();
         if (ObjectUtils.isEmpty(response)) {

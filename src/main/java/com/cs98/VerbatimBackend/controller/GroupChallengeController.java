@@ -151,19 +151,6 @@ public class GroupChallengeController {
             throw new RuntimeException("failed to build response");
         }
 
-//        // if user has completed the group challenge
-//        if ((customChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), challengeId)) ||
-//                // THIS SHOULD BE STANDARD CHALLENGE ID!!!!
-//                standardChallengeUserResponseRepository.existsByUserIdAndChallengeId(user.getId(), STANDARDchallengeId)) {
-//            response = groupChallengeService.loadGroupChallengeStatsForUser(user, groupChallenge);
-//
-//            if (ObjectUtils.isEmpty(response)) {
-//                throw new RuntimeException("failed to build response");
-//            }
-//
-//            return ResponseEntity.ok(response);
-//        }
-
         return ResponseEntity.ok(response);
     }
 
