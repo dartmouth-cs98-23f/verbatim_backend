@@ -220,14 +220,14 @@ public class UserGroupService {
 
 
         double groupScore = (totalStreak * (totalGlobalVerbatims + totalGroupVerbatims)) + groupChallsCompleted + globalChallsCompleted;
-        double scaledRating = (MAX_SCALED_GROUP_RATING * groupScore) / MAX_RAW_GROUP_RATING;
-        scaledRating = (int)Math.min(scaledRating, MAX_SCALED_GROUP_RATING);
+//        double scaledRating = (MAX_SCALED_GROUP_RATING * groupScore) / MAX_RAW_GROUP_RATING;
+//        scaledRating = (int)Math.min(scaledRating, MAX_SCALED_GROUP_RATING);
 
         // groupscore / max_raw = x / max_scaled
         // maxscaled * (groupscore / max_raw)
         List<User> verbaMatch = findVerbaMatch(completedStandardChalls, completedCustomChalls);
         return GroupStats.builder()
-                .groupRating(scaledRating)
+                .groupRating(groupScore)
                 .groupMembers(usernames)
                 .verbaMatch(verbaMatch)
                 .groupId(groupId)
