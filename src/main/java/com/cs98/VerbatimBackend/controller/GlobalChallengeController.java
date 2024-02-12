@@ -56,6 +56,7 @@ public class GlobalChallengeController {
 
         User user = userRepository.findByUsername(username);
         GlobalChallenge dailyChallenge = globalChallengeRepository.findFirst1ByOrderByDateDesc();
+        int challengeNum = globalChallengeRepository.getGlobalChallengeDisplayNumber();
         GlobalChallengeUserSpecificResponse response;
         if (user.getHasCompletedDailyChallenge()) {
             GlobalChallengeUserResponse responseForUser = globalChallengeUserResponseRepository.findByUserIdAndGlobalChallengeId(user.getId(), dailyChallenge.getId());
@@ -70,6 +71,7 @@ public class GlobalChallengeController {
                     .q4(dailyChallenge.getQ4().getContent())
                     .q5(dailyChallenge.getQ5().getContent())
                     .globalChallengeId(dailyChallenge.getId())
+                    .globalChallengeDisplayNum(challengeNum)
                     .totalResponses(globalChallengeUserResponseRepository.countByGlobalChallengeId(dailyChallenge.getId()))
                     .categoryQ1(dailyChallenge.getQ1().getCategory().getTitle())
                     .categoryQ2(dailyChallenge.getQ2().getCategory().getTitle())
@@ -99,8 +101,10 @@ public class GlobalChallengeController {
     @GetMapping(path = "api/v1/globalChallengeNoSignIn")
     public ResponseEntity<GlobalChallengeQuestions> getGlobalQuestions() {
         GlobalChallenge globalChallenge = globalChallengeRepository.findFirst1ByOrderByDateDesc();
+        int challengeNum = globalChallengeRepository.getGlobalChallengeDisplayNumber();
         GlobalChallengeQuestions globalChallengeQuestions = GlobalChallengeQuestions.builder()
                 .globalChallengeId(globalChallenge.getId())
+                .globalChallengeDisplayNum(challengeNum)
                 .q1(globalChallenge.getQ1().getContent())
                 .q2(globalChallenge.getQ2().getContent())
                 .q3(globalChallenge.getQ3().getContent())
@@ -197,8 +201,8 @@ public class GlobalChallengeController {
                 .statsQ5(response.getStatsQ5())
                 .verbatasticUsers(response.getVerbatasticUsers())
                 .globalChallengeId(response.getGlobalChallengeId())
+                .globalChallengeDisplayNum(globalChallengeRepository.getGlobalChallengeDisplayNumber())
                 .totalResponses(response.getTotalResponses())
-                .globalChallengeId(response.getGlobalChallengeId())
                 .q1(response.getQ1())
                 .q2(response.getQ2())
                 .q3(response.getQ3())

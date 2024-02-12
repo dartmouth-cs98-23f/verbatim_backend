@@ -17,6 +17,8 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +52,7 @@ public class UserRelationshipController {
                 .requestingFriend(requestingUser)
                 .requestedFriend(requestedUser)
                 .active(false)
+                .date(Date.valueOf(LocalDate.now()))
                 .build();
 
         userRelationshipRepository.save(newRel);
@@ -123,6 +126,7 @@ public class UserRelationshipController {
 
         if (request.getAccept()) {
             relationship.setActive(true);
+            relationship.setDate(Date.valueOf(LocalDate.now()));
             userRelationshipRepository.save(relationship);
 
             // create a "group" with these two users
