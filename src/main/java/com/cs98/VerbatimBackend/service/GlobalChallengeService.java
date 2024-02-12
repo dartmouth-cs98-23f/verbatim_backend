@@ -58,6 +58,8 @@ public class GlobalChallengeService {
                 .responseQ1(submissionRequest.getResponseQ1())
                 .responseQ2(submissionRequest.getResponseQ2())
                 .responseQ3(submissionRequest.getResponseQ3())
+                .responseQ4(submissionRequest.getResponseQ4())
+                .responseQ5(submissionRequest.getResponseQ5())
                 .build();
 
         globalChallengeUserResponseRepository.save(userResponseDAO);
@@ -88,17 +90,32 @@ public class GlobalChallengeService {
                         response.getGlobalChallenge().getId(),
                         user.getId());
 
+        int numVerbatimQ4 = globalChallengeUserResponseRepository.
+                countByResponseQ4AndGlobalChallengeIdAndUserIdNot(
+                        response.getResponseQ4(),
+                        response.getGlobalChallenge().getId(),
+                        user.getId());
+
+        int numVerbatimQ5 = globalChallengeUserResponseRepository.
+                countByResponseQ5AndGlobalChallengeIdAndUserIdNot(
+                        response.getResponseQ5(),
+                        response.getGlobalChallenge().getId(),
+                        user.getId());
+
         int numExactVerbatim = globalChallengeUserResponseRepository.
-                countByResponseQ1AndResponseQ2AndResponseQ3AndGlobalChallengeIdAndUserIdNot(
+                countByResponseQ1AndResponseQ2AndResponseQ3AndResponseQ4AndResponseQ5AndGlobalChallengeIdAndUserIdNot(
                         response.getResponseQ1(),
                         response.getResponseQ2(),
                         response.getResponseQ3(),
+                        response.getResponseQ4(),
+                        response.getResponseQ5(),
                         response.getGlobalChallenge().getId(),
                         user.getId()
                 );
 
         // figure out which question has the most verbatims
-        int mostVerbatim = Math.max(numVerbatimQ1, Math.max(numVerbatimQ2, numVerbatimQ3));
+        int mostVerbatim = Math.max(Math.max(Math.max(Math.max(
+                numVerbatimQ1, numVerbatimQ2), numVerbatimQ3), numVerbatimQ4), numVerbatimQ5);
 
         // create an empty list of usernames
         Map<String, List<String>> verbatastic = new HashMap<String, List<String>>();
@@ -115,10 +132,18 @@ public class GlobalChallengeService {
             responseVerbatim = response.getResponseQ2();
             submissions = globalChallengeUserResponseRepository.
                     findAllByGlobalChallengeIdAndResponseQ2(response.getGlobalChallenge().getId(), responseVerbatim);
-        } else {
+        } else if (mostVerbatim == numVerbatimQ3){
             responseVerbatim = response.getResponseQ3();
             submissions = globalChallengeUserResponseRepository.
                     findAllByGlobalChallengeIdAndResponseQ3(response.getGlobalChallenge().getId(), responseVerbatim);
+        } else if (mostVerbatim == numVerbatimQ4) {
+            responseVerbatim = response.getResponseQ4();
+            submissions = globalChallengeUserResponseRepository.
+                    findAllByGlobalChallengeIdAndResponseQ4(response.getGlobalChallenge().getId(), responseVerbatim);
+        } else {
+            responseVerbatim = response.getResponseQ5();
+            submissions = globalChallengeUserResponseRepository.
+                    findAllByGlobalChallengeIdAndResponseQ5(response.getGlobalChallenge().getId(), responseVerbatim);
         }
 
         // add all usernames except for the current user to usersVerbatim
@@ -149,6 +174,8 @@ public class GlobalChallengeService {
         Map<String, String> q1FriendResponses = new HashMap<String, String>();
         Map<String, String> q2FriendResponses = new HashMap<String, String>();
         Map<String, String> q3FriendResponses = new HashMap<String, String>();
+        Map<String, String> q4FriendResponses = new HashMap<String, String>();
+        Map<String, String> q5FriendResponses = new HashMap<String, String>();
 
         // for each friend's global challenge response, map their username to their response
         for (GlobalChallengeUserResponse friendResponse: friendResponses) {
@@ -156,10 +183,14 @@ public class GlobalChallengeService {
             String responseQ1 = friendResponse.getResponseQ1();
             String responseQ2 = friendResponse.getResponseQ2();
             String responseQ3 = friendResponse.getResponseQ3();
+            String responseQ4 = friendResponse.getResponseQ4();
+            String responseQ5 = friendResponse.getResponseQ5();
 
             q1FriendResponses.put(friend, responseQ1);
             q2FriendResponses.put(friend, responseQ2);
             q3FriendResponses.put(friend, responseQ3);
+            q4FriendResponses.put(friend, responseQ4);
+            q5FriendResponses.put(friend, responseQ5);
         }
 
         String firstMostPopularQ1 = globalChallengeUserResponseRepository.findMostPopularQ1ResponseByChallengeId(
@@ -260,25 +291,99 @@ public class GlobalChallengeService {
                 .friendResponses(q3FriendResponses)
                 .build();
 
+        String firstMostPopularQ4 = globalChallengeUserResponseRepository.findMostPopularQ4ResponseByChallengeId(
+                response.getGlobalChallenge().getId()
+        );
+        String secondMostPopularQ4 = globalChallengeUserResponseRepository.findSecondMostPopularQ4ResponseByChallengeId(
+                response.getGlobalChallenge().getId(),
+                firstMostPopularQ4
+        );
+        String thirdMostPopularQ4 = globalChallengeUserResponseRepository.findThirdMostPopularQ4ResponseByChallengeId(
+                response.getGlobalChallenge().getId(),
+                firstMostPopularQ4,
+                secondMostPopularQ4
+        );
+
+        QuestionStatistics statsQ4 = QuestionStatistics.builder()
+                .firstMostPopular(firstMostPopularQ4)
+                .secondMostPopular(secondMostPopularQ4)
+                .thirdMostPopular(thirdMostPopularQ4)
+                .numResponsesFirst(globalChallengeUserResponseRepository.countByResponseQ4AndGlobalChallengeId(
+                        firstMostPopularQ4,
+                        response.getGlobalChallenge().getId()
+                ))
+                .numResponsesSecond(globalChallengeUserResponseRepository.countByResponseQ4AndGlobalChallengeId(
+                        secondMostPopularQ4,
+                        response.getGlobalChallenge().getId()
+                ))
+                .numResponsesThird(globalChallengeUserResponseRepository.countByResponseQ4AndGlobalChallengeId(
+                        thirdMostPopularQ4,
+                        response.getGlobalChallenge().getId()
+                ))
+                .friendResponses(q4FriendResponses)
+                .build();
+
+        String firstMostPopularQ5 = globalChallengeUserResponseRepository.findMostPopularQ5ResponseByChallengeId(
+                response.getGlobalChallenge().getId()
+        );
+        String secondMostPopularQ5 = globalChallengeUserResponseRepository.findSecondMostPopularQ5ResponseByChallengeId(
+                response.getGlobalChallenge().getId(),
+                firstMostPopularQ5
+        );
+        String thirdMostPopularQ5 = globalChallengeUserResponseRepository.findThirdMostPopularQ5ResponseByChallengeId(
+                response.getGlobalChallenge().getId(),
+                firstMostPopularQ5,
+                secondMostPopularQ5
+        );
+
+        QuestionStatistics statsQ5 = QuestionStatistics.builder()
+                .firstMostPopular(firstMostPopularQ5)
+                .secondMostPopular(secondMostPopularQ5)
+                .thirdMostPopular(thirdMostPopularQ5)
+                .numResponsesFirst(globalChallengeUserResponseRepository.countByResponseQ5AndGlobalChallengeId(
+                        firstMostPopularQ5,
+                        response.getGlobalChallenge().getId()
+                ))
+                .numResponsesSecond(globalChallengeUserResponseRepository.countByResponseQ5AndGlobalChallengeId(
+                        secondMostPopularQ5,
+                        response.getGlobalChallenge().getId()
+                ))
+                .numResponsesThird(globalChallengeUserResponseRepository.countByResponseQ5AndGlobalChallengeId(
+                        thirdMostPopularQ5,
+                        response.getGlobalChallenge().getId()
+                ))
+                .friendResponses(q5FriendResponses)
+                .build();
+
         return GlobalChallengeUserSpecificResponse.builder()
                 .q1(response.getGlobalChallenge().getQ1().getContent())
                 .q2(response.getGlobalChallenge().getQ2().getContent())
                 .q3(response.getGlobalChallenge().getQ3().getContent())
+                .q4(response.getGlobalChallenge().getQ4().getContent())
+                .q5(response.getGlobalChallenge().getQ5().getContent())
                 .globalChallengeId(response.getGlobalChallenge().getId())
                 .categoryQ1(response.getGlobalChallenge().getQ1().getCategory().getTitle())
                 .categoryQ2(response.getGlobalChallenge().getQ2().getCategory().getTitle())
                 .categoryQ3(response.getGlobalChallenge().getQ3().getCategory().getTitle())
+                .categoryQ4(response.getGlobalChallenge().getQ4().getCategory().getTitle())
+                .categoryQ5(response.getGlobalChallenge().getQ5().getCategory().getTitle())
                 .responseQ1(response.getResponseQ1())
                 .responseQ2(response.getResponseQ2())
                 .responseQ3(response.getResponseQ3())
+                .responseQ4(response.getResponseQ4())
+                .responseQ5(response.getResponseQ5())
                 .totalResponses(totalResponses)
                 .numVerbatimQ1(numVerbatimQ1)
                 .numVerbatimQ2(numVerbatimQ2)
                 .numVerbatimQ3(numVerbatimQ3)
+                .numVerbatimQ4(numVerbatimQ4)
+                .numVerbatimQ5(numVerbatimQ5)
                 .numExactVerbatim(numExactVerbatim)
                 .statsQ1(statsQ1)
                 .statsQ2(statsQ2)
                 .statsQ3(statsQ3)
+                .statsQ4(statsQ4)
+                .statsQ5(statsQ5)
                 .verbatasticUsers(verbatastic)
                 .build();
     }

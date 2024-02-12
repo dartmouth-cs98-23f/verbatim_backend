@@ -33,4 +33,8 @@ public class GlobalChallengeUserResponse {
 
     private String responseQ3;
 
+    private String responseQ4;
+
+    private String responseQ5;
+
 }

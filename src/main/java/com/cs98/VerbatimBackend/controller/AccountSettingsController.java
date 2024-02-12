@@ -10,6 +10,7 @@ import com.cs98.VerbatimBackend.response.GetUserStatsResponse;
 import com.cs98.VerbatimBackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import com.cs98.VerbatimBackend.request.AccountSettingsRequest;
@@ -31,6 +32,9 @@ public class AccountSettingsController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping(path = "api/v1/accountSettings")
     public ResponseEntity<User> accountSettings(@RequestBody AccountSettingsRequest request) {
@@ -119,7 +123,7 @@ public class AccountSettingsController {
             }
 
             if (!request.getNewPassword().isEmpty()) {                      // make sure new password is not empty
-                user.setPassword(request.getNewPassword());                 // update the password
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));                 // update the password
                 return ResponseEntity.ok(userRepository.save(user));        // save the user
             } else {
                 return ResponseEntity.status(Status.BAD_REQUEST).build();

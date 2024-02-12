@@ -11,6 +11,10 @@ public class SubmitGlobalChallengeAnswerRequestWithSignIn {
 
     private String responseQ3;
 
+    private String responseQ4;
+
+    private String responseQ5;
+
     private Boolean isLogin;
 
     private String emailOrUsername;
