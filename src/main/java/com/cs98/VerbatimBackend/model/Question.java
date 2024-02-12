@@ -41,6 +41,14 @@ public class Question {
     private List<GlobalChallenge> globalChallengeQ3;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "q4", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GlobalChallenge> globalChallengeQ4;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "q5", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GlobalChallenge> globalChallengeQ5;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "q1", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StandardChallenge> standardChallengeQ1;
 

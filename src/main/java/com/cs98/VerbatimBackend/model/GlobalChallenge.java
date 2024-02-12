@@ -32,5 +32,13 @@ public class GlobalChallenge {
     @JoinColumn(name = "q3_id")
     private Question q3;
 
+    @ManyToOne
+    @JoinColumn(name = "q4_id")
+    private Question q4;
+
+    @ManyToOne
+    @JoinColumn(name = "q5_id")
+    private Question q5;
+
     private Date date;
 }
