@@ -20,4 +20,6 @@ public class GlobalChallengeQuestions {
     private String categoryQ5;
 
     private int globalChallengeId;
+
+    private int globalChallengeDisplayNum;
 }
