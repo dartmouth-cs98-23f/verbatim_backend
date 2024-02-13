@@ -362,6 +362,7 @@ public class GlobalChallengeService {
                 .q4(response.getGlobalChallenge().getQ4().getContent())
                 .q5(response.getGlobalChallenge().getQ5().getContent())
                 .globalChallengeId(response.getGlobalChallenge().getId())
+                .globalChallengeDisplayNum(globalChallengeRepository.getGlobalChallengeDisplayNumber())
                 .categoryQ1(response.getGlobalChallenge().getQ1().getCategory().getTitle())
                 .categoryQ2(response.getGlobalChallenge().getQ2().getCategory().getTitle())
                 .categoryQ3(response.getGlobalChallenge().getQ3().getCategory().getTitle())

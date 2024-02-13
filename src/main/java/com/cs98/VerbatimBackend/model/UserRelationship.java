@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Entity
 @Builder
 @AllArgsConstructor
@@ -25,4 +27,6 @@ public class UserRelationship {
     private User requestedFriend;
 
     private Boolean active;
+
+    private Date date;
 }
