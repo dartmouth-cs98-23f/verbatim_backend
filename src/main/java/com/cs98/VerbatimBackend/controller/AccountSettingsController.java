@@ -133,19 +133,22 @@ public class AccountSettingsController {
         }
     }
 
-    @GetMapping(path = "api/v1/{username}/getUserStats")
-    public ResponseEntity<GetUserStatsResponse> getUserStats(@PathVariable String username) {
-        User user;
+    @GetMapping(path = "api/v1/{yourusername}/{targetusername}/getUserStats")
+    public ResponseEntity<GetUserStatsResponse> getUserStats(@PathVariable String yourusername,
+                                                             @PathVariable String targetusername) {
+        User yourUser;
+        User targetUser;
         // if user does not exist, return bad request
-        if (!userRepository.existsByUsername(username)) {
+        if (!userRepository.existsByUsername(targetusername) || !userRepository.existsByUsername(yourusername)) {
             return ResponseEntity.status(Status.USER_NOT_FOUND).build();
         }
         // if the user exists, update changed fields
         else  {
-            user = userRepository.findByUsername(username);
+            targetUser = userRepository.findByUsername(targetusername);
+            yourUser = userRepository.findByUsername(yourusername);
         }
 
-        GetUserStatsResponse response = userService.getUserStats(user);
+        GetUserStatsResponse response = userService.getUserStats(yourUser, targetUser);
 
         if (ObjectUtils.isEmpty(response)) {
             return ResponseEntity.status(Status.FETCH_USER_STATS_FAILED).build();
