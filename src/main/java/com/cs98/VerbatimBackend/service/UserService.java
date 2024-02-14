@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,20 +57,27 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public GetUserStatsResponse getUserStats(User user) {
+    public GetUserStatsResponse getUserStats(User yourUser, User targetUser) {
         // get the user's stats
-        int streak = user.getStreak();
-        int groupChal = user.getNumCustomChallengesCompleted();
-        int globalChal = user.getNumGlobalChallengesCompleted();
+        int streak = targetUser.getStreak();
+        int groupChal = targetUser.getNumCustomChallengesCompleted();
+        int globalChal = targetUser.getNumGlobalChallengesCompleted();
 
         // get the user's friends
-        List<UserRelationship> friends = userRelationshipRepository.findActiveFriendsByUserId(user.getId());
+        List<UserRelationship> friends = userRelationshipRepository.findActiveFriendsByUserId(targetUser.getId());
         int numFriends = friends.size();
+
+        // if yourUser and targetUser are friends, get the date, else null
+        Date friendsSince = null;
+        if (userRelationshipRepository.friendshipExists(yourUser.getId(), targetUser.getId())) {
+            UserRelationship frienship = userRelationshipRepository.findFriendship(yourUser.getId(), targetUser.getId());
+            friendsSince = frienship.getDate();
+        }
 
         // get the user's highest verbamatch
 
         // get friend groups
-        List<UserGroupJunction> friendGroups = userGroupJunctionRepository.findFriendGroupsByUserId(user.getId());
+        List<UserGroupJunction> friendGroups = userGroupJunctionRepository.findFriendGroupsByUserId(targetUser.getId());
 
         // initialize vars
         int highestVerbamatchGroupId = 0;
@@ -86,10 +94,10 @@ public class UserService implements UserDetailsService {
         }
 
         // get the user with the highest score
-        User verbamatch = user; // default to self
+        User verbamatch = targetUser; // default to self
         List<UserGroupJunction> group = userGroupJunctionRepository.findByGroupId(highestVerbamatchGroupId);
         for (UserGroupJunction person: group) {
-            if (!Objects.equals(person.getUser().getId(), user.getId())) {
+            if (!Objects.equals(person.getUser().getId(), targetUser.getId())) {
                 verbamatch = person.getUser();
             }
         }
@@ -102,6 +110,7 @@ public class UserService implements UserDetailsService {
                 .numFriends(numFriends)
                 .verbaMatchUser(verbamatch)
                 .verbaMatchScore(highestVerbamatchScore)
+                .friendsSince(friendsSince)
                 .build();
     }
 
