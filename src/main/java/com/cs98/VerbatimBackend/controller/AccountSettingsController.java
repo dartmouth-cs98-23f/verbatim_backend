@@ -133,6 +133,28 @@ public class AccountSettingsController {
         }
     }
 
+    @GetMapping(path = "api/v1/{username}/getUserStats")
+    public ResponseEntity<GetUserStatsResponse> getUserStats(@PathVariable String username) {
+        User user;
+        // if user does not exist, return bad request
+        if (!userRepository.existsByUsername(username)) {
+            return ResponseEntity.status(Status.USER_NOT_FOUND).build();
+        }
+        // if the user exists, update changed fields
+        else  {
+            user = userRepository.findByUsername(username);
+        }
+
+        GetUserStatsResponse response = userService.getUserStats(user);
+
+        if (ObjectUtils.isEmpty(response)) {
+            return ResponseEntity.status(Status.FETCH_USER_STATS_FAILED).build();
+        }
+
+        return ResponseEntity.ok(response);
+
+    }
+
     @GetMapping(path = "api/v1/{yourusername}/{targetusername}/getUserStats")
     public ResponseEntity<GetUserStatsResponse> getUserStats(@PathVariable String yourusername,
                                                              @PathVariable String targetusername) {
