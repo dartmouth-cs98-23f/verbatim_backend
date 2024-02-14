@@ -30,4 +30,11 @@ public interface UserRelationshipRepository extends JpaRepository<UserRelationsh
             "THEN 'TRUE' ELSE 'FALSE' END",
             nativeQuery = true)
     Boolean friendshipExists(Integer user1_id, Integer user2_id);
+
+    @Query(value = "SELECT * FROM user_relationship " +
+            "WHERE (requesting_user_id = ?1 OR requested_user_id = ?1) " +
+            "AND (requesting_user_id = ?2 OR requested_user_id = ?2) " +
+            "AND active = TRUE",
+            nativeQuery = true)
+    UserRelationship findFriendship(Integer user1_id, Integer user2_id);
 }
