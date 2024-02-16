@@ -114,4 +114,53 @@ public class UserService implements UserDetailsService {
                 .build();
     }
 
+    public GetUserStatsResponse getUserStats(User user) {
+        // get the user's stats
+        int streak = user.getStreak();
+        int groupChal = user.getNumCustomChallengesCompleted();
+        int globalChal = user.getNumGlobalChallengesCompleted();
+
+        // get the user's friends
+        List<UserRelationship> friends = userRelationshipRepository.findActiveFriendsByUserId(user.getId());
+        int numFriends = friends.size();
+
+        // get the user's highest verbamatch
+
+        // get friend groups
+        List<UserGroupJunction> friendGroups = userGroupJunctionRepository.findFriendGroupsByUserId(user.getId());
+
+        // initialize vars
+        int highestVerbamatchGroupId = 0;
+        double highestVerbamatchScore = -1;
+
+        // loop through all friends
+        for (UserGroupJunction group: friendGroups) {
+            GroupStats stats = userGroupService.getStats(group.getId());
+            double score = stats.getGroupRating();
+            if (score > highestVerbamatchScore) {
+                highestVerbamatchScore = score;
+                highestVerbamatchGroupId = group.getGroup().getId();
+            }
+        }
+
+        // get the user with the highest score
+        User verbamatch = user; // default to self
+        List<UserGroupJunction> group = userGroupJunctionRepository.findByGroupId(highestVerbamatchGroupId);
+        for (UserGroupJunction person: group) {
+            if (!Objects.equals(person.getUser().getId(), user.getId())) {
+                verbamatch = person.getUser();
+            }
+        }
+
+        // create the response
+        return GetUserStatsResponse.builder()
+                .streak(streak)
+                .groupChalllengesCompleted(groupChal)
+                .globalChallengesCompleted(globalChal)
+                .numFriends(numFriends)
+                .verbaMatchUser(verbamatch)
+                .verbaMatchScore(highestVerbamatchScore)
+                .build();
+    }
+
 }
