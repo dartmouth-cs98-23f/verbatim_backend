@@ -67,38 +67,47 @@ public class UserService implements UserDetailsService {
         List<UserRelationship> friends = userRelationshipRepository.findActiveFriendsByUserId(targetUser.getId());
         int numFriends = friends.size();
 
-        // if yourUser and targetUser are friends, get the date, else null
-        Date friendsSince = null;
-        if (userRelationshipRepository.friendshipExists(yourUser.getId(), targetUser.getId())) {
-            UserRelationship frienship = userRelationshipRepository.findFriendship(yourUser.getId(), targetUser.getId());
-            friendsSince = frienship.getDate();
-        }
-
-        // get the user's highest verbamatch
-
-        // get friend groups
-        List<UserGroupJunction> friendGroups = userGroupJunctionRepository.findFriendGroupsByUserId(targetUser.getId());
-
         // initialize vars
+        boolean areFriends = userRelationshipRepository.friendshipExists(yourUser.getId(), targetUser.getId());
+        Date friendsSince = null;
+        User verbamatch = yourUser;
+        double highestVerbamatchScore = 0;
         int highestVerbamatchGroupId = 0;
-        double highestVerbamatchScore = -1;
 
-        // loop through all friends
-        for (UserGroupJunction group: friendGroups) {
-            GroupStats stats = userGroupService.getStats(group.getId());
-            double score = stats.getGroupRating();
-            if (score > highestVerbamatchScore) {
-                highestVerbamatchScore = score;
-                highestVerbamatchGroupId = group.getGroup().getId();
+        if (areFriends) {
+            UserRelationship frienship = userRelationshipRepository.findFriendship(yourUser.getId(), targetUser.getId());
+            // if yourUser and targetUser are friends, get the date, else null
+            friendsSince = frienship.getDate();
+
+            // get the verbamatch
+            int friendGroup = userGroupJunctionRepository.getGroupIdForFriendGroup(yourUser.getId(), targetUser.getId());
+            GroupStats stats = userGroupService.getStats(friendGroup);
+            highestVerbamatchScore = stats.getGroupRating();
+
+        } else {
+            // get the user's highest verbamatch
+            // get friend groups
+            List<UserGroupJunction> friendGroups = userGroupJunctionRepository.findFriendGroupsByUserId(targetUser.getId());
+
+            if (friendGroups.isEmpty()) {
+                verbamatch = null; // set verbamatch to null if user has no friends
             }
-        }
+            // loop through all friends
+            for (UserGroupJunction group: friendGroups) {
+                GroupStats stats = userGroupService.getStats(group.getGroup().getId());
+                double score = stats.getGroupRating();
+                if (score > highestVerbamatchScore) {
+                    highestVerbamatchScore = score;
+                    highestVerbamatchGroupId = group.getGroup().getId();
+                }
+            }
 
-        // get the user with the highest score
-        User verbamatch = targetUser; // default to self
-        List<UserGroupJunction> group = userGroupJunctionRepository.findByGroupId(highestVerbamatchGroupId);
-        for (UserGroupJunction person: group) {
-            if (!Objects.equals(person.getUser().getId(), targetUser.getId())) {
-                verbamatch = person.getUser();
+            // get the user with the highest score
+            List<UserGroupJunction> group = userGroupJunctionRepository.findByGroupId(highestVerbamatchGroupId);
+            for (UserGroupJunction person: group) {
+                if (!Objects.equals(person.getUser().getId(), targetUser.getId())) {
+                    verbamatch = person.getUser();
+                }
             }
         }
 
@@ -131,11 +140,11 @@ public class UserService implements UserDetailsService {
 
         // initialize vars
         int highestVerbamatchGroupId = 0;
-        double highestVerbamatchScore = -1;
+        double highestVerbamatchScore = 0;
 
         // loop through all friends
         for (UserGroupJunction group: friendGroups) {
-            GroupStats stats = userGroupService.getStats(group.getId());
+            GroupStats stats = userGroupService.getStats(group.getGroup().getId());
             double score = stats.getGroupRating();
             if (score > highestVerbamatchScore) {
                 highestVerbamatchScore = score;
@@ -144,7 +153,7 @@ public class UserService implements UserDetailsService {
         }
 
         // get the user with the highest score
-        User verbamatch = user; // default to self
+        User verbamatch = null; // default to null
         List<UserGroupJunction> group = userGroupJunctionRepository.findByGroupId(highestVerbamatchGroupId);
         for (UserGroupJunction person: group) {
             if (!Objects.equals(person.getUser().getId(), user.getId())) {
