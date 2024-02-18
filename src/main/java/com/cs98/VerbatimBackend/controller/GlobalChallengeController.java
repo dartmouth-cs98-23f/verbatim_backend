@@ -172,7 +172,7 @@ public class GlobalChallengeController {
             userRelationshipRepository.save(newRel);
         }
         SubmitGlobalChallengeAnswerRequest submitAnswerRequest = new SubmitGlobalChallengeAnswerRequest();
-        submitAnswerRequest.setUsername(request.getUsername());
+        submitAnswerRequest.setUsername(userEntityToReturn.getUsername());
         submitAnswerRequest.setResponseQ1(request.getResponseQ1());
         submitAnswerRequest.setResponseQ2(request.getResponseQ2());
         submitAnswerRequest.setResponseQ3(request.getResponseQ3());

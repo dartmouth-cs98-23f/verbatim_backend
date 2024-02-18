@@ -113,12 +113,12 @@ public class AccountSettingsController {
             user = userRepository.findByUsername(request.getUsername());
 
             // make sure old password matches user's current password
-            if (!request.getOldPassword().equals(user.getPassword())) {
+            if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
                 return ResponseEntity.status(Status.WRONG_PASSWORD).build();
             }
 
             // don't update if not changed
-            if(request.getNewPassword().equals(request.getOldPassword())) {
+            if(passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
                 return ResponseEntity.status(Status.OLD_PASSWORD_SAME_AS_NEW_PASSWORD).build();
             }
 
