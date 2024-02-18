@@ -248,7 +248,7 @@ public class UserGroupService {
         int totalVerbatims = 0;
         Map<Integer, Map<Integer, Set<String>>> verbaMap = new HashMap<>();
         for (GlobalChallengeUserResponse chall : completedChalls) {
-            if (verbaMap.containsKey(chall.getId())) {
+            if (verbaMap.containsKey(chall.getGlobalChallenge().getId())) {
                 if (verbaMap.get(chall.getGlobalChallenge().getId()).get(1).contains(chall.getResponseQ1())) {
                     totalVerbatims += 1;
                 }
