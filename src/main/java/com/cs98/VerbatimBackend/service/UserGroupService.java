@@ -176,6 +176,7 @@ public class UserGroupService {
 
     public GroupStats getStats(int groupId) {
         UserGroup group = userGroupRepository.findById(groupId);
+        System.out.println("Group " + group.getId());
         List<UserGroupJunction> groupMembers = userGroupJunctionRepository.findByGroupId(groupId);
         List<String> usernames = new ArrayList<>();
         int globalChallsCompleted = 0;
@@ -184,9 +185,11 @@ public class UserGroupService {
         int totalGroupVerbatims;
         int totalGlobalVerbatims;
 
+        System.out.println("Members: ");
         List<Integer> userIds = new ArrayList<>();
         for (UserGroupJunction member : groupMembers) {
             User user = member.getUser();
+            System.out.println(user.getUsername());
             userIds.add(user.getId());
             usernames.add(user.getUsername());
             globalChallsCompleted += user.getNumGlobalChallengesCompleted();
@@ -218,8 +221,14 @@ public class UserGroupService {
 
         totalGroupVerbatims = getTotalStandardVerbatims(completedStandardChalls) + getTotalCustomVerbatims(completedCustomChalls);
 
-
+        System.out.println("totalStreak: " + totalStreak);
+        System.out.println("totalGlobalVerbatims: " + totalGlobalVerbatims);
+        System.out.println("totalGroupVerbatims: " + totalGroupVerbatims);
+        System.out.println("groupChallsCompleted: " + groupChallsCompleted);
+        System.out.println("globalChallsCompleted: " + globalChallsCompleted);
+        System.out.println("Group Score: totalStreak * (totalGlobalVerbatims + totalGroupVerbatims)) + groupChallsCompleted + globalChallsCompleted");
         double groupScore = (totalStreak * (totalGlobalVerbatims + totalGroupVerbatims)) + groupChallsCompleted + globalChallsCompleted;
+        System.out.println("Group Score = (" + totalStreak + " * (" + totalGlobalVerbatims + " + " + totalGroupVerbatims + ")) + " + groupChallsCompleted + " + " + globalChallsCompleted + " = " + groupScore);
 //        double scaledRating = (MAX_SCALED_GROUP_RATING * groupScore) / MAX_RAW_GROUP_RATING;
 //        scaledRating = (int)Math.min(scaledRating, MAX_SCALED_GROUP_RATING);
 
@@ -239,7 +248,7 @@ public class UserGroupService {
         int totalVerbatims = 0;
         Map<Integer, Map<Integer, Set<String>>> verbaMap = new HashMap<>();
         for (GlobalChallengeUserResponse chall : completedChalls) {
-            if (verbaMap.containsKey(chall.getId())) {
+            if (verbaMap.containsKey(chall.getGlobalChallenge().getId())) {
                 if (verbaMap.get(chall.getGlobalChallenge().getId()).get(1).contains(chall.getResponseQ1())) {
                     totalVerbatims += 1;
                 }
@@ -247,6 +256,12 @@ public class UserGroupService {
                     totalVerbatims += 1;
                 }
                 if (verbaMap.get(chall.getGlobalChallenge().getId()).get(3).contains(chall.getResponseQ3())) {
+                    totalVerbatims += 1;
+                }
+                if (verbaMap.get(chall.getGlobalChallenge().getId()).get(4).contains(chall.getResponseQ4())) {
+                    totalVerbatims += 1;
+                }
+                if (verbaMap.get(chall.getGlobalChallenge().getId()).get(5).contains(chall.getResponseQ5())) {
                     totalVerbatims += 1;
                 }
             }
@@ -260,10 +275,18 @@ public class UserGroupService {
                 Set<String> q3Responses = new HashSet<>();
                 q3Responses.add(chall.getResponseQ3());
 
+                Set<String> q4Responses = new HashSet<>();
+                q4Responses.add(chall.getResponseQ4());
+
+                Set<String> q5Responses = new HashSet<>();
+                q5Responses.add(chall.getResponseQ5());
+
                 Map<Integer, Set<String>> questionToResponses = new HashMap<>();
                 questionToResponses.put(1, q1Responses);
                 questionToResponses.put(2, q2Responses);
                 questionToResponses.put(3, q3Responses);
+                questionToResponses.put(4, q4Responses);
+                questionToResponses.put(5, q5Responses);
 
                 verbaMap.put(chall.getGlobalChallenge().getId(), questionToResponses);
             }
