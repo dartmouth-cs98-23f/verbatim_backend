@@ -52,7 +52,6 @@ public class UserRelationshipController {
                 .requestingFriend(requestingUser)
                 .requestedFriend(requestedUser)
                 .active(false)
-                .date(Date.valueOf(LocalDate.now()))
                 .build();
 
         userRelationshipRepository.save(newRel);
