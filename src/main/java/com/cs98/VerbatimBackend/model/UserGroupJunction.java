@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class UserGroupJunction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
     @ManyToOne
