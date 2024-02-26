@@ -22,4 +22,6 @@ public class GlobalChallengeQuestions {
     private int globalChallengeId;
 
     private int globalChallengeDisplayNum;
+
+    private int totalResponses;
 }
