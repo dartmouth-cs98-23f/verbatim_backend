@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class DailyReset {
@@ -53,17 +51,27 @@ public class DailyReset {
         userRepository.saveAll(updated_users);
 
         List<Category> dailyCategories = categoryRepository.fetchFiveRandomCategories();
+        System.out.println("Categories: " + dailyCategories.size());
+
+        int displayId = globalChallengeRepository.getGlobalChallengeDisplayNumber() + 1;
+        int oneWeekAgo = displayId - 7;
+
 
 //         get a random question from each category
         List<Question> dailyQuestions = new ArrayList<>();
         for (Category category : dailyCategories) {
-            Question question = questionRepository.fetchRandomQuestionByCategoryId(category.getId());
+            Question question = questionRepository.fetchRandomQuestionByCategoryIdBeforeChallenge(category.getId(), oneWeekAgo);
             dailyQuestions.add(question);
+
+            // update the last date used
+            question.setLastGlobalChalUsed(displayId);
+            questionRepository.save(question);
         }
 
 //         build the row in the global challenge table
         GlobalChallenge globalChallenge = GlobalChallenge.builder()
                 .date(Date.valueOf(LocalDate.now()))
+                .displayId(displayId)
                 .q1(dailyQuestions.get(0))
                 .q2(dailyQuestions.get(1))
                 .q3(dailyQuestions.get(2))

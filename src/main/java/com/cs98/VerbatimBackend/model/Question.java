@@ -23,6 +23,8 @@ public class Question {
 
     private String content;
 
+    private Integer lastGlobalChalUsed;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "category_id")

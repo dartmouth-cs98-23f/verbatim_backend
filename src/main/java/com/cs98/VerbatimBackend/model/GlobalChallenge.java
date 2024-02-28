@@ -41,4 +41,6 @@ public class GlobalChallenge {
     private Question q5;
 
     private Date date;
+
+    private Integer displayId;
 }
