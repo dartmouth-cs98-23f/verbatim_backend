@@ -8,6 +8,7 @@ import com.cs98.VerbatimBackend.repository.UserRelationshipRepository;
 import com.cs98.VerbatimBackend.repository.UserRepository;
 import com.cs98.VerbatimBackend.request.FriendAcceptOrDeclineRequest;
 import com.cs98.VerbatimBackend.request.FriendRequest;
+import com.cs98.VerbatimBackend.request.RemoveFriendRequest;
 import com.cs98.VerbatimBackend.request.UserGroupCreationRequest;
 import com.cs98.VerbatimBackend.response.*;
 import com.cs98.VerbatimBackend.response.UserGroupCreationResponse;
@@ -214,6 +215,21 @@ public class UserRelationshipController {
         // get stats
         return userGroupController.getGroupStats(groupId);
 
+    }
+
+    @PostMapping(path = "api/v1/removeFriend")
+    public ResponseEntity<String> removeFriend(@RequestBody RemoveFriendRequest request) {
+        User baseUser = userRepository.findByUsername(request.getBaseUsername());
+        User userToRemove = userRepository.findByUsername(request.getUsernameToRemove());
+
+        UserRelationship friendshipToRemove = userRelationshipRepository.findFriendship(baseUser.getId(), userToRemove.getId());
+
+        if (ObjectUtils.isEmpty(friendshipToRemove)) {
+            return ResponseEntity.status(Status.FRIENDSHIP_NOT_FOUND).build();
+        }
+        userRelationshipRepository.delete(friendshipToRemove);
+
+        return ResponseEntity.ok("success");
     }
 
 }

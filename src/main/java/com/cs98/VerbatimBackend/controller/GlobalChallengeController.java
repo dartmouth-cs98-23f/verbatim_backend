@@ -23,6 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
 @RestController
 public class GlobalChallengeController {
     @Autowired
@@ -110,6 +113,7 @@ public class GlobalChallengeController {
                 .q3(globalChallenge.getQ3().getContent())
                 .q4(globalChallenge.getQ4().getContent())
                 .q5(globalChallenge.getQ5().getContent())
+                .totalResponses(globalChallengeUserResponseRepository.countByGlobalChallengeId(globalChallenge.getId()))
                 .categoryQ1(globalChallenge.getQ1().getCategory().getTitle())
                 .categoryQ2(globalChallenge.getQ2().getCategory().getTitle())
                 .categoryQ3(globalChallenge.getQ3().getCategory().getTitle())
@@ -167,6 +171,7 @@ public class GlobalChallengeController {
                     .requestingFriend(referringUser)
                     .requestedFriend(userEntityToReturn)
                     .active(true)
+                    .date(Date.valueOf(LocalDate.now()))
                     .build();
 
             userRelationshipRepository.save(newRel);
