@@ -5,14 +5,12 @@ import com.cs98.VerbatimBackend.misc.UserDetailsPrincipal;
 import com.cs98.VerbatimBackend.model.UserRelationship;
 import com.cs98.VerbatimBackend.repository.*;
 import com.cs98.VerbatimBackend.request.SubmitGlobalChallengeAnswerRequestWithSignIn;
-import com.cs98.VerbatimBackend.response.GetGlobalChallengeQuestionResponse;
-import com.cs98.VerbatimBackend.response.GlobalChallengeQuestions;
-import com.cs98.VerbatimBackend.response.GlobalChallengeUserSpecificResponse;
+import com.cs98.VerbatimBackend.request.UserGroupCreationRequest;
+import com.cs98.VerbatimBackend.response.*;
 import com.cs98.VerbatimBackend.model.GlobalChallenge;
 import com.cs98.VerbatimBackend.model.GlobalChallengeUserResponse;
 import com.cs98.VerbatimBackend.model.User;
 import com.cs98.VerbatimBackend.request.SubmitGlobalChallengeAnswerRequest;
-import com.cs98.VerbatimBackend.response.GlobalChallengeUserSpecificResponseWithUser;
 import com.cs98.VerbatimBackend.service.GlobalChallengeService;
 import com.cs98.VerbatimBackend.service.UserService;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class GlobalChallengeController {
@@ -53,6 +53,9 @@ public class GlobalChallengeController {
 
     @Autowired
     private UserRelationshipRepository userRelationshipRepository;
+
+    @Autowired
+    private UserGroupController userGroupController;
 
     @PostMapping(path = "api/v1/globalChallenge")
     public ResponseEntity<GlobalChallengeUserSpecificResponse> loadDailyChallenge(@NotNull @RequestBody String username) {
@@ -175,6 +178,21 @@ public class GlobalChallengeController {
                     .build();
 
             userRelationshipRepository.save(newRel);
+
+            // build the group request
+            UserGroupCreationRequest userGroupCreationRequest = new UserGroupCreationRequest();
+            userGroupCreationRequest.setCreatedByUsername(referringUser.getUsername());
+            userGroupCreationRequest.setGroupName(referringUser.getUsername() + "_" + userEntityToReturn.getUsername());
+            List<String> usernames = new ArrayList<>();
+            usernames.add(userEntityToReturn.getUsername());
+            userGroupCreationRequest.setUsernamesToAdd(usernames);
+
+            // create the group
+            ResponseEntity<UserGroupCreationResponse> response = userGroupController.createGroup(userGroupCreationRequest);
+
+            if (ObjectUtils.isEmpty(response)) { // make sure the response is not empty
+                throw new RuntimeException("could not build response");
+            }
         }
         SubmitGlobalChallengeAnswerRequest submitAnswerRequest = new SubmitGlobalChallengeAnswerRequest();
         submitAnswerRequest.setUsername(userEntityToReturn.getUsername());
