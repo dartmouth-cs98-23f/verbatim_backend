@@ -1,4 +1,5 @@
 # Verbatim Backend
+https://verbatim-game.com/
 
 ## Description
 
@@ -14,6 +15,20 @@ In this project, we've chosen Spring Boot as our backend technology stack. Below
 ## Setup
 
 Here are the steps to follow in order to run the initial 'Verbatim Backend' code:
+
+#### For IntelliJ IDEA (recommended)
+
+1. Clone the 'verbatim_backend' repository.
+2. After opening the repository in IntelliJ, navigate to the 'src/main/java/com/cs98/VerbatimBackend' directory.
+3. Set up Run Configurations:
+   - Run: ```spring-boot:run```
+   - Working Directory: ```verbatim_backend```
+   - VM Options: ```-Dspring.profiles.active=dev```
+4. Connect to your Postgres database by entering fields in the ```application-dev.properties``` file:
+   - ```spring.datasource.url```: something like ```jbdc:postgres://localhost:5432/verbatim``` (you should already have a postgres database created)
+   - ```spring.datasource.username```: your postgres username
+   - ```spring.datasource.password```: your postgres password
+5. Click the play button in the upper right-hand corner to run the backend.
 
 #### For VS Code
 
