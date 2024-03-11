@@ -39,7 +39,7 @@ Here are the steps to follow in order to run the initial 'Verbatim Backend' code
 
 ## Deployment
 
-The backend is deployed via Heroku.
+The backend is deployed via Heroku. We are utilizing a PostgreSQL database, which is connected to the deployed version of our app as a Heroku resource.
 
 ## Authors
 
